@@ -6,9 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
+import { useSendContactUsMutation } from "@/helpers/contactUsApi";
 
 export default function ContactForm() {
   const [loading, setLoading] = useState(false);
+  const [sendContactUs] = useSendContactUsMutation();
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -24,12 +26,53 @@ export default function ContactForm() {
     e.preventDefault();
     try {
       setLoading(true);
-      /* 🔗 hit your API route or EmailJS endpoint here */
+      const payload = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        contact: formData.phone.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      };
 
-      toast.success("Message sent ✅");
-      //   setFormData({ name: '', phone: '', email: '', subject: '', message: '' });
+      const res = await sendContactUs(payload).unwrap();
+
+      if (res?.success) {
+        toast.success(
+          typeof res?.message === "string"
+            ? res.message
+            : "Support message created successfully",
+          { id: "contact-us" }
+        );
+        setFormData({
+          name: "",
+          phone: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+        return;
+      }
+
+      toast.error(res?.message || "Something went wrong", {
+        id: "contact-us",
+      });
     } catch (err) {
-      toast.error("Something went wrong 😢");
+      const errors = err?.data?.errorMessages ?? err?.data?.errors;
+      const firstValidation =
+        Array.isArray(errors) && errors[0]?.message
+          ? errors[0].message
+          : null;
+      const message =
+        firstValidation ??
+        err?.data?.message ??
+        err?.data?.error ??
+        err?.error ??
+        "Something went wrong. Please try again.";
+
+      toast.error(
+        typeof message === "string" ? message : "Something went wrong",
+        { id: "contact-us" }
+      );
     } finally {
       setLoading(false);
     }
