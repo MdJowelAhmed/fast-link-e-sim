@@ -1,7 +1,13 @@
+"use client";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import React from "react";
+import { useGetFaqsQuery } from "@/helpers/faqApi";
 
 const FAQ = () => {
+  const { data, isLoading } = useGetFaqsQuery();
+  console.log(data);
+  const faqs = data?.data ?? [];
+
   return (
     <section className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 py-10 xl:py-[100px]">
       <div className="text-center">
@@ -20,73 +26,30 @@ const FAQ = () => {
           collapsible
           className="w-full pt-[53px] space-y-2"
         >
-          <AccordionItem value="item-1" className="border border-[#5555551F]">
-            <AccordionTrigger className="leading-[104.4%] hover:no-underline">
-              Do you offer online shopping and home delivery?
-            </AccordionTrigger>
-            <AccordionContent>
-              Yes! You can shop online and have your order delivered straight to
-              your home.
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="item-2" className="border border-[#5555551F]">
-            <AccordionTrigger className="leading-[104.4%] hover:no-underline">
-              Do you carry organic or gluten-free products?
-            </AccordionTrigger>
-            <AccordionContent>
-              Yes, we offer a variety of organic and gluten-free options. Just
-              look for labels or use filters while shopping.
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="item-3" className="border border-[#5555551F]">
-            <AccordionTrigger className="leading-[104.4%] hover:no-underline">
-              Can I place a special order for a product you don’t usually carry?
-            </AccordionTrigger>
-            <AccordionContent>
-              Yes, just contact us and we’ll do our best to get it for you.
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="item-4" className="border border-[#5555551F]">
-            <AccordionTrigger className="leading-[104.4%] hover:no-underline">
-              Do you offer curbside pickup?
-            </AccordionTrigger>
-            <AccordionContent>
-              Yes, curbside pickup is available. Place your order online and
-              we’ll bring it out to your car when you arrive.
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="item-5" className="border border-[#5555551F]">
-            <AccordionTrigger className="leading-[104.4%] hover:no-underline">
-              Can I use multiple coupons in one transaction?
-            </AccordionTrigger>
-            <AccordionContent>
-              We allow one coupon per order, unless otherwise stated in the
-              offer terms.
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="item-6" className="border border-[#5555551F]">
-            <AccordionTrigger className="leading-[104.4%] hover:no-underline">
-              Can I place a special order for a product you don’t usually carry?
-            </AccordionTrigger>
-            <AccordionContent>
-              Yes, just contact us and we’ll do our best to get it for you.
-            </AccordionContent>
-          </AccordionItem>
-          
-          <AccordionItem value="item-7" className="border border-[#5555551F]">
-            <AccordionTrigger className="leading-[104.4%] hover:no-underline">
-              Can I use multiple coupons in one transaction?
-            </AccordionTrigger>
-            <AccordionContent>
-              We allow one coupon per order, unless otherwise stated in the
-              offer terms.
-            </AccordionContent>
-          </AccordionItem>
+          {isLoading ? (
+            <div className="text-center py-10 text-sm text-[#5C5C5C]">
+              Loading FAQs...
+            </div>
+          ) : faqs.length > 0 ? (
+            faqs.map((faq, index) => (
+              <AccordionItem
+                key={faq._id ?? index}
+                value={`item-${faq._id ?? index}`}
+                className="border border-[#5555551F]"
+              >
+                <AccordionTrigger className="leading-[104.4%] hover:no-underline text-left">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent>
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))
+          ) : (
+            <div className="text-center py-10 text-sm text-[#5C5C5C]">
+              No FAQs found.
+            </div>
+          )}
         </Accordion>
       </div>
     </section>

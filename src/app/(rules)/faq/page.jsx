@@ -1,3 +1,5 @@
+"use client";
+
 import ShortBanner from "@/components/shared/ShortBanner";
 import {
   Accordion,
@@ -6,8 +8,12 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import React from "react";
+import { useGetFaqsQuery } from "@/helpers/faqApi";
 
 const page = () => {
+  const { data, isLoading } = useGetFaqsQuery();
+  const faqs = data?.data ?? [];
+
   return (
     <section>
       <ShortBanner text="FAQ" />
@@ -28,17 +34,29 @@ const page = () => {
             collapsible
             className="w-full pt-10 space-y-2"
           >
-            {Array.from({ length: 15 }).map((_, idx) => (
-              <AccordionItem value={`item-${idx + 1}`} key={idx}>
-                <AccordionTrigger className="leading-[104.4%] hover:no-underline bg-[#E6F5EE]">
-                  Do you offer online shopping and home delivery?
-                </AccordionTrigger>
-                <AccordionContent className="border border-[#5555551F]">
-                  Yes! You can shop online and have your order delivered
-                  straight to your home.
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+            {isLoading ? (
+              <div className="text-center py-10 text-sm text-[#5C5C5C]">
+                Loading FAQs...
+              </div>
+            ) : faqs.length > 0 ? (
+              faqs.map((faq, idx) => (
+                <AccordionItem
+                  value={`item-${faq._id ?? idx}`}
+                  key={faq._id ?? idx}
+                >
+                  <AccordionTrigger className="leading-[104.4%] hover:no-underline bg-[#E6F5EE] text-left">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="border border-[#5555551F]">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))
+            ) : (
+              <div className="text-center py-10 text-sm text-[#5C5C5C]">
+                No FAQs found.
+              </div>
+            )}
           </Accordion>
         </div>
       </div>
