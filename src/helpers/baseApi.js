@@ -8,7 +8,7 @@ const baseQuery = fetchBaseQuery({
       if (endpoint === "resetPassword") {
         const resetToken = localStorage.getItem("resetToken");
         if (resetToken) {
-          headers.set("token", resetToken);
+          headers.set("Authorization", resetToken);
         }
       } else {
         const token = localStorage.getItem("token");

@@ -1,16 +1,12 @@
 "use client";
 
+import { imageUrl } from "@/components/shared/getImageUrl";
 import GoBackButton from "@/components/shared/GoBackButton";
 import { config } from "@/config/env-config";
 import { useGetBlogByIdQuery } from "@/helpers/blogsApi";
 import React from "react";
 
-const getImageUrl = (path) => {
-  if (!path) return "/blogImg.png";
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  if (!config.BASE_URL) return path;
-  return `${config.BASE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
-};
+
 
 const page = ({ params }) => {
   const { data, isLoading } = useGetBlogByIdQuery(params?.id);
@@ -25,7 +21,7 @@ const page = ({ params }) => {
       ) : blog ? (
         <>
           <img
-            src={getImageUrl(blog.thumbnail)}
+            src={imageUrl(blog.thumbnail)}
             alt={blog.title || "Blog Image"}
             className="w-full h-[456px] object-cover rounded-[10px]"
           />

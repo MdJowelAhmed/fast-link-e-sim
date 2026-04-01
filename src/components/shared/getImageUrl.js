@@ -6,6 +6,6 @@ export const imageUrl = (path) => {
       return path;
     } else {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      return `${baseUrl}/${path}`;
+      return `${baseUrl}/files${path}`;
     }
   };
