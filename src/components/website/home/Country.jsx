@@ -1,24 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
-import ban from "@/assests/ban.png";
-import nepal from "@/assests/nepal.png";
-import china from "@/assests/china.png";
-import australia from "@/assests/australia.png";
-import canada from "@/assests/canada.png";
-import germany from "@/assests/germany.png";
-import bahrain from "@/assests/bahrain.png";
-import japan from "@/assests/japan.png";
-import maleysia from "@/assests/maleysia.png";
-import morocco from "@/assests/morocco.png";
-import newZealand from "@/assests/newZealand.png";
-import portugal from "@/assests/portugal.png";
-import southKorea from "@/assests/southKorea.png";
-import turkey from "@/assests/turkey.png";
-import uk from "@/assests/uk.png";
-import usa from "@/assests/usa.png";
 import stateMap from "@/assests/stateMap.svg";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -34,176 +18,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { GoArrowLeft } from "react-icons/go";
 import SimCard from "@/components/shared/SimCard";
-
-const states = [
-  { label: "Popular", value: "Popular" },
-  { label: "Asia", value: "Asia" },
-  { label: "Europe", value: "Europe" },
-  { label: "North America", value: "North America" },
-  { label: "South America", value: "South America" },
-  { label: "Caribbean", value: "Caribbean" },
-  { label: "Africa", value: "Africa" },
-  { label: "Oceania", value: "Oceania" },
-  { label: "Middle East", value: "Middle East" },
-];
-
-const regionState = [
-  {
-    label: "Asia",
-    value: "Asia",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-  {
-    label: "Europe",
-    value: "Europe",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-  {
-    label: "North America",
-    value: "North America",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-  {
-    label: "South America",
-    value: "South America",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-  {
-    label: "Caribbean",
-    value: "Caribbean",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-  {
-    label: "Africa",
-    value: "Africa",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-  {
-    label: "Oceania",
-    value: "Oceania",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-  {
-    label: "Middle East",
-    value: "Middle East",
-    icon: (
-      <Image
-        className="w-[42px] h-[30px]"
-        src={stateMap}
-        alt="state map icon"
-      />
-    ),
-  },
-];
-
-const countries = [
-  { label: "Bangladesh", value: "Bangladesh", flag: ban },
-  { label: "Nepal", value: "Nepal", flag: nepal },
-  { label: "China", value: "China", flag: china },
-  { label: "Australia", value: "Australia", flag: australia },
-  { label: "Canada", value: "Canada", flag: canada },
-  { label: "Germany", value: "Germany", flag: germany },
-  { label: "Bahrain", value: "Bahrain", flag: bahrain },
-  { label: "Japan", value: "Japan", flag: japan },
-  { label: "Malaysia", value: "Malaysia", flag: maleysia },
-  { label: "Morocco", value: "Morocco", flag: morocco },
-  { label: "New Zealand", value: "New Zealand", flag: newZealand },
-  { label: "Portugal", value: "Portugal", flag: portugal },
-  { label: "South Korea", value: "South Korea", flag: southKorea },
-  { label: "Turkey", value: "Turkey", flag: turkey },
-  { label: "UK", value: "UK", flag: uk },
-  { label: "USA", value: "USA", flag: usa },
-  { label: "Bangladesh", value: "Bangladesh", flag: ban },
-  { label: "Nepal", value: "Nepal", flag: nepal },
-  { label: "China", value: "China", flag: china },
-  { label: "Australia", value: "Australia", flag: australia },
-  { label: "Canada", value: "Canada", flag: canada },
-  { label: "Germany", value: "Germany", flag: germany },
-  { label: "Bahrain", value: "Bahrain", flag: bahrain },
-  { label: "Japan", value: "Japan", flag: japan },
-  { label: "Malaysia", value: "Malaysia", flag: maleysia },
-  { label: "Morocco", value: "Morocco", flag: morocco },
-  { label: "New Zealand", value: "New Zealand", flag: newZealand },
-  { label: "Portugal", value: "Portugal", flag: portugal },
-  { label: "South Korea", value: "South Korea", flag: southKorea },
-  { label: "Turkey", value: "Turkey", flag: turkey },
-  { label: "UK", value: "UK", flag: uk },
-  { label: "USA", value: "USA", flag: usa },
-  { label: "Bangladesh", value: "Bangladesh", flag: ban },
-  { label: "Nepal", value: "Nepal", flag: nepal },
-  { label: "China", value: "China", flag: china },
-  { label: "Australia", value: "Australia", flag: australia },
-  { label: "Canada", value: "Canada", flag: canada },
-  { label: "Germany", value: "Germany", flag: germany },
-  { label: "Bahrain", value: "Bahrain", flag: bahrain },
-  { label: "Japan", value: "Japan", flag: japan },
-  { label: "Malaysia", value: "Malaysia", flag: maleysia },
-  { label: "Morocco", value: "Morocco", flag: morocco },
-  { label: "New Zealand", value: "New Zealand", flag: newZealand },
-  { label: "Portugal", value: "Portugal", flag: portugal },
-  { label: "South Korea", value: "South Korea", flag: southKorea },
-  { label: "Turkey", value: "Turkey", flag: turkey },
-  { label: "UK", value: "UK", flag: uk },
-  { label: "USA", value: "USA", flag: usa },
-  { label: "Bangladesh", value: "Bangladesh", flag: ban },
-  { label: "Nepal", value: "Nepal", flag: nepal },
-  { label: "China", value: "China", flag: china },
-  { label: "Australia", value: "Australia", flag: australia },
-  { label: "Canada", value: "Canada", flag: canada },
-  { label: "Germany", value: "Germany", flag: germany },
-  { label: "Bahrain", value: "Bahrain", flag: bahrain },
-  { label: "Japan", value: "Japan", flag: japan },
-  { label: "Malaysia", value: "Malaysia", flag: maleysia },
-  { label: "Morocco", value: "Morocco", flag: morocco },
-  { label: "New Zealand", value: "New Zealand", flag: newZealand },
-  { label: "Portugal", value: "Portugal", flag: portugal },
-  { label: "South Korea", value: "South Korea", flag: southKorea },
-  { label: "Turkey", value: "Turkey", flag: turkey },
-  { label: "UK", value: "UK", flag: uk },
-  { label: "USA", value: "USA", flag: usa },
-];
+import {
+  useGetCountriesBasedOnRegionQuery,
+  useGetRegionsQuery,
+} from "@/helpers/regionsApi";
 
 const categories = [
   {
@@ -221,12 +39,66 @@ const Country = () => {
   const url = pathname;
 
   const [region, setRegion] = useState("Local");
-  const [stateStatus, setStateStatus] = useState("Popular");
+  const [stateStatus, setStateStatus] = useState("Oceania");
   const [categoryState, setCategoryState] = useState("Date");
   const [showCard, setShowCard] = useState("");
-  console.log(showCard);
+  const [searchText, setSearchText] = useState("");
+
+  const { data: regionsResponse, isLoading: isRegionsLoading } =
+    useGetRegionsQuery();
+  const localTabs = regionsResponse?.data?.countrysRegions ?? [];
+  const regionalItems = regionsResponse?.data?.subregions ?? [];
+
+  useEffect(() => {
+    if (!localTabs.length) return;
+    if (!localTabs.includes(stateStatus)) {
+      setStateStatus(localTabs.includes("Oceania") ? "Oceania" : localTabs[0]);
+    }
+  }, [localTabs, stateStatus]);
+
+  const {
+    data: countriesResponse,
+    isLoading: isCountriesLoading,
+    isFetching: isCountriesFetching,
+  } = useGetCountriesBasedOnRegionQuery(stateStatus, {
+    skip: region !== "Local" || !stateStatus,
+  });
+
+  const countries = useMemo(
+    () =>
+      (countriesResponse?.data ?? []).filter((country) =>
+        country?.name?.toLowerCase().includes(searchText.toLowerCase())
+      ),
+    [countriesResponse?.data, searchText]
+  );
 
   const shortList = countries?.slice(0, 16);
+  const filteredRegionalItems = useMemo(
+    () =>
+      regionalItems.filter((item) =>
+        item?.name?.toLowerCase().includes(searchText.toLowerCase())
+      ),
+    [regionalItems, searchText]
+  );
+
+  const handleRegionChange = (value) => {
+    setRegion(value);
+    setShowCard("");
+    setSearchText("");
+    if (value === "Local") {
+      setStateStatus(localTabs.includes("Oceania") ? "Oceania" : localTabs[0] ?? "Oceania");
+    }
+  };
+
+  const renderSearchInput = (className = "py-1.5 px-4 focus:outline-none") => (
+    <input
+      type="text"
+      value={searchText}
+      onChange={(e) => setSearchText(e.target.value)}
+      placeholder="Search your Choice"
+      className={className}
+    />
+  );
 
   return (
     <section className="bg-[#F7F7F7]">
@@ -246,7 +118,7 @@ const Country = () => {
               className="bg-white px-5 py-2.5 rounded-full shadow hover:shadow-md transition-shadow cursor-pointer"
             >
               <button
-                onClick={() => setRegion(btn.value)}
+                onClick={() => handleRegionChange(btn.value)}
                 className={cn(
                   "text-xs md:text-lg cursor-pointer",
                   region === btn.value ? "text-[#333333]" : "text-[#A1A1A1]"
@@ -323,18 +195,21 @@ const Country = () => {
                 {/* state category & search bar */}
                 <div className="flex flex-col lg:flex-row justify-center lg:items-center gap-6 lg:gap-2 border-b-2 pb-5 border-[#EEEEEE]">
                   <div className="flex items-center flex-wrap gap-2">
-                    {states?.map((state) => (
+                    {localTabs?.map((state) => (
                       <button
-                        onClick={() => setStateStatus(state.value)}
+                        onClick={() => {
+                          setStateStatus(state);
+                          setShowCard("");
+                        }}
                         className={cn(
                           "px-3 py-1.5 rounded cursor-pointer text-xs md:text-sm",
-                          stateStatus === state.value
+                          stateStatus === state
                             ? "bg-primary text-white"
                             : "bg-[#EEEEEE] text-[#767676]"
                         )}
-                        key={state.value}
+                        key={state}
                       >
-                        {state.label}
+                        {state}
                       </button>
                     ))}
                   </div>
@@ -347,59 +222,43 @@ const Country = () => {
                     <button>
                       <Search className="text-primary" />
                     </button>
-                    <input
-                      type="text"
-                      placeholder="Search your Choice"
-                      className="py-1.5 px-4 focus:outline-none"
-                    />
+                    {renderSearchInput()}
                   </div>
                 </div>
 
                 {/* country cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mt-6">
-                  {url?.includes("shop")
-                    ? countries.map((country, idx) => (
+                  {isRegionsLoading || isCountriesLoading || isCountriesFetching ? (
+                    <p className="col-span-full text-sm text-[#767676]">
+                      Loading countries...
+                    </p>
+                  ) : (url?.includes("shop") ? countries : shortList).length ? (
+                    (url?.includes("shop") ? countries : shortList).map(
+                      (country, idx) => (
                         <div
-                          onClick={() => setShowCard(country?.label)}
+                          onClick={() => setShowCard(country?.name)}
                           key={idx}
                           className="flex items-center gap-3 py-4 px-7 rounded-full cursor-pointer"
                           style={{
                             boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
                           }}
                         >
-                          <Image
+                          <img
                             className="h-5 w-8 object-contain"
-                            height={20}
-                            width={32}
-                            src={country.flag}
-                            alt={country.label}
-                          />
-                          <p className="text-[#767676] text-base">
-                            {country.label}
-                          </p>
-                        </div>
-                      ))
-                    : shortList.map((country, idx) => (
-                        <div
-                          onClick={() => setShowCard(country?.label)}
-                          key={idx}
-                          className="flex items-center gap-3 py-4 px-7 rounded-full cursor-pointer"
-                          style={{
-                            boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
-                          }}
-                        >
-                          <Image
-                            className="h-5 w-8 object-contain"
-                            height={20}
-                            width={32}
-                            src={country.flag}
-                            alt={country.label}
+                            src={country?.flag}
+                            alt={country?.name}
                           />
                           <p className="text-[#767676] text-xs md:text-base">
-                            {country.label}
+                            {country?.name}
                           </p>
                         </div>
-                      ))}
+                      )
+                    )
+                  ) : (
+                    <p className="col-span-full text-sm text-[#767676]">
+                      No countries found for {stateStatus}.
+                    </p>
+                  )}
                 </div>
 
                 {!url?.includes("shop") && (
@@ -479,19 +338,41 @@ const Country = () => {
               </div>
             ) : (
               <div className="border-t-2 border-[#EEEEEE] pt-6 grid grid-cols-2 lg:grid-cols-3 items-center justify-center gap-2 md:gap-6">
-                {regionState?.map((state) => (
-                  <div
-                    onClick={() => setShowCard(state?.label)}
-                    key={state?.value}
-                    className="flex items-center gap-3 px-7 rounded-full cursor-pointer lg:w-[364px] h-16 md:h-20 bg-[#FDFDFD] hover:bg-[#e6f5ee]"
-                    style={{
-                      boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
-                    }}
-                  >
-                    {state?.icon}{" "}
-                    <p className="text-xs md:text-base">{state?.label}</p>
-                  </div>
-                ))}
+                {isRegionsLoading ? (
+                  <p className="col-span-full text-sm text-[#767676]">
+                    Loading regional eSIMs...
+                  </p>
+                ) : filteredRegionalItems.length ? (
+                  filteredRegionalItems?.map((state) => (
+                    <div
+                      onClick={() => setShowCard(state?.name)}
+                      key={state?.slugname}
+                      className="flex items-center gap-3 px-4 md:px-7 rounded-full cursor-pointer lg:w-[364px] h-16 md:h-20 bg-[#FDFDFD] hover:bg-[#e6f5ee]"
+                      style={{
+                        boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
+                      }}
+                    >
+                      {state?.image ? (
+                        <img
+                          className="w-[42px] h-[30px] rounded object-cover"
+                          src={state.image}
+                          alt={state.name}
+                        />
+                      ) : (
+                        <Image
+                          className="w-[42px] h-[30px]"
+                          src={stateMap}
+                          alt="state map icon"
+                        />
+                      )}
+                      <p className="text-xs md:text-base">{state?.name}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="col-span-full text-sm text-[#767676]">
+                    No regional data found.
+                  </p>
+                )}
               </div>
             )}
           </div>

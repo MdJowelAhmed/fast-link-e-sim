@@ -11,7 +11,8 @@ const regionsApi = baseApi.injectEndpoints({
     }),
     getCountriesBasedOnRegion: builder.query({
       query: (region) => ({
-        url: `/country/${region}`,
+        url: "/country",
+        params: { region },
         method: "GET",
       }),
       providesTags: ["Region"],
