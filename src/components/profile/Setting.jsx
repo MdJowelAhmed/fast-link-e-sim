@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import ShortBanner from "../shared/ShortBanner";
 import Link from "next/link";
-import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import toast from "react-hot-toast";
+import { useChangePasswordMutation } from "@/helpers/authApi";
 
 const Setting = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -15,7 +16,54 @@ const Setting = () => {
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
 
-  const handleSubmit = () => {};
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match", { id: "change-pw" });
+      return;
+    }
+
+    toast.loading("Updating password...", { id: "change-pw" });
+
+    try {
+      const res = await changePassword({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+      }).unwrap();
+
+      if (res?.success) {
+        toast.success(res?.message || "Password updated", { id: "change-pw" });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        return;
+      }
+
+      toast.error(res?.message || "Could not update password", {
+        id: "change-pw",
+      });
+    } catch (err) {
+      const errors = err?.data?.errorMessages ?? err?.data?.errors;
+      const firstValidation =
+        Array.isArray(errors) && errors[0]?.message ? errors[0].message : null;
+      const message =
+        firstValidation ??
+        err?.data?.message ??
+        err?.data?.error ??
+        err?.error ??
+        "Something went wrong. Please try again.";
+      toast.error(typeof message === "string" ? message : "Update failed", {
+        id: "change-pw",
+      });
+    }
+  };
 
   return (
     <div className="bg-[#F7F7F7] min-h-[90vh] pb-16">
@@ -46,6 +94,8 @@ const Setting = () => {
                       placeholder="Enter password"
                       required
                       className="bg-white shadow-none h-12"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setIsPasswordVisible(!isPasswordVisible)}
@@ -69,6 +119,8 @@ const Setting = () => {
                       placeholder="Enter new password"
                       required
                       className="bg-white shadow-none h-12"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
                     />
                     <span
                       onClick={() =>
@@ -94,6 +146,8 @@ const Setting = () => {
                       placeholder="Enter confirm password"
                       required
                       className="bg-white shadow-none h-12"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
                     />
                     <span
                       onClick={() =>
@@ -109,9 +163,10 @@ const Setting = () => {
                 {/* submit button */}
                 <Button
                   type="submit"
+                  disabled={isLoading}
                   className="w-full mt-5 h-12 text-[#F6F6F6]"
                 >
-                  Update Password
+                  {isLoading ? "Updating..." : "Update Password"}
                 </Button>
               </div>
             </div>

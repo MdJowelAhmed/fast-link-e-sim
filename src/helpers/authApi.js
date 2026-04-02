@@ -34,14 +34,7 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth"],
     }),
-    changePassword: builder.mutation({
-      query: (body) => ({
-        url: "/auth/change-password",
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Auth"],
-    }),
+ 
     forgetPassword: builder.mutation({
       query: (body) => ({
         url: "/auth/forget-password",
@@ -58,6 +51,14 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth"],
     }),
+    changePassword: builder.mutation({
+      query: (body) => ({
+        url: "/auth/change-password",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
 });
 
@@ -66,7 +67,7 @@ export const {
   useSignupMutation,
   useVerifyEmailMutation,
   useResendVerificationEmailMutation,
-  useChangePasswordMutation,
   useForgetPasswordMutation,
   useResetPasswordMutation,
+  useChangePasswordMutation,
 } = authApi;
