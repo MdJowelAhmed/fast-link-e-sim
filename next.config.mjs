@@ -8,6 +8,7 @@ const nextConfig = {
       // Flags & misc
       { protocol: "https", hostname: "flagcdn.com" },
       { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "i.ibb.co" },
     ],
   },
 };
