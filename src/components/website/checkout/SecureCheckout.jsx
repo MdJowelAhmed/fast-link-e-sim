@@ -1,7 +1,8 @@
-import React from "react";
-import Image from "next/image";
+"use client";
+
+import React, { useEffect, useMemo, useState } from "react";
 import simThumb from "@/assests/simThumb.svg";
-import Link from "next/link";
+import { useCouponCheckMutation, useEsimCheckoutMutation } from "@/helpers/eSimApi";
 import ShortBanner from "@/components/shared/ShortBanner";
 import {
   Select,
@@ -12,8 +13,93 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { getSelectedEsim, saveSelectedEsim } from "@/helpers/selectedEsim";
 
 const SecureCheckout = () => {
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [submittedCoupon, setSubmittedCoupon] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const [couponData, setCouponData] = useState(null);
+
+  const [esimCheckout, { isLoading: isCheckoutLoading }] =
+    useEsimCheckoutMutation();
+  const [couponCheck, { isLoading: isCouponChecking }] =
+    useCouponCheckMutation();
+
+  useEffect(() => {
+    const esimPackage = getSelectedEsim();
+    if (esimPackage) {
+      setSelectedPackage(esimPackage);
+      saveSelectedEsim(esimPackage);
+    }
+  }, []);
+
+  const primaryCountryCode = useMemo(() => {
+    const first = selectedPackage?.supported_countries?.[0];
+    return first?.country_code || "";
+  }, [selectedPackage]);
+
+  const effectiveCouponCode = useMemo(() => {
+    const code = submittedCoupon || couponInput;
+    return code.trim();
+  }, [couponInput, submittedCoupon]);
+
+  const handleCompleteOrder = async () => {
+    if (!selectedPackage) return;
+    setSubmitError("");
+
+    try {
+      const netPrice = effectiveCouponCode
+        ? couponData?.total_price ?? selectedPackage.priceUSD
+        : selectedPackage.priceUSD;
+
+      const orderBody = {
+        package_id: selectedPackage.packageId,
+        type: selectedPackage.type,
+        country: selectedPackage.countryName,
+        supported_countries: selectedPackage.supported_countries ?? [],
+        net_price: netPrice,
+        ...(effectiveCouponCode ? { coupon: effectiveCouponCode } : {}),
+        rawData: selectedPackage,
+      };
+
+      const checkoutResult = await esimCheckout(orderBody).unwrap();
+      const checkoutUrl = checkoutResult?.data;
+
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+        return;
+      }
+
+      setSubmitError("Checkout URL not found in API response.");
+    } catch (e) {
+      console.error("Checkout failed:", e);
+      setSubmitError("Checkout failed. Please try again.");
+    }
+  };
+
+  const handleConfirmCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code || !selectedPackage) return;
+    setSubmitError("");
+
+    try {
+      const res = await couponCheck({
+        code,
+        amount: Number(selectedPackage.priceUSD || 0),
+      }).unwrap();
+
+      setSubmittedCoupon(res?.data?.code || code);
+      setCouponData(res?.data ?? null);
+    } catch (e) {
+      console.error("Coupon check failed:", e);
+      setCouponData(null);
+      setSubmittedCoupon("");
+      setSubmitError("Invalid coupon code.");
+    }
+  };
+
   return (
     <div className="bg-[#F7F7F7]">
       <ShortBanner text="Secure Checkout" />
@@ -26,10 +112,10 @@ const SecureCheckout = () => {
         >
           {/* Left Side - Image */}
           <div className="flex items-center justify-center">
-            <Image
-              src={simThumb}
-              alt="Fatafati eSIM"
-              className="rounded-md w-full h-full lg:h-[293px] lg:w-[464px]"
+            <img
+              src={selectedPackage?.operatorImage || simThumb.src}
+              alt={selectedPackage?.operatorName || "eSIM"}
+              className="rounded-md w-full h-full lg:h-[293px] lg:w-[464px] object-cover"
             />
           </div>
 
@@ -37,16 +123,16 @@ const SecureCheckout = () => {
           <div className="pt-10 md:px-10 w-full md:w-1/2  lg:w-[337px]">
             <div>
               <h2 className="text-xl font-medium leading-5 text-[#333333]">
-                Fatafati
+                {selectedPackage?.operatorName || "No package selected"}
               </h2>
               <p className="text-primary text-sm leading-5 mt-5 font-normal">
-                Bangladesh
+                {selectedPackage?.countryName || "Select a package first"}
               </p>
               <ul className="mt-8 text-sm space-y-4">
                 <li className="flex justify-between items-center">
                   <p className="text-[#5C5C5C] leading-5 opacity-80">Data</p>{" "}
                   <p className="text-[#333333] font-medium leading-5 opacity-80">
-                    2 GB
+                    {selectedPackage?.dataAmount || "N/A"}
                   </p>
                 </li>
                 <hr style={{ borderColor: "#C0C0C0" }} />
@@ -55,14 +141,18 @@ const SecureCheckout = () => {
                     Validity
                   </p>{" "}
                   <p className="text-[#333333] font-medium leading-5 opacity-80">
-                    7 Day
+                    {selectedPackage?.duration || "N/A"}
                   </p>
                 </li>
                 <hr style={{ borderColor: "#C0C0C0" }} />
                 <li className="flex justify-between items-center">
                   <p className="text-[#5C5C5C] leading-5 opacity-80">Price</p>{" "}
                   <p className="text-[#333333] font-semibold leading-5 opacity-80">
-                    $2.00 USD
+                    $
+                    {selectedPackage
+                      ? Number(selectedPackage.priceUSD || 0).toFixed(2)
+                      : "0.00"}{" "}
+                    USD
                   </p>
                 </li>
               </ul>
@@ -107,13 +197,20 @@ const SecureCheckout = () => {
             </h3>
             <div className="flex items-center gap-2">
               <input
-                type="email"
+                type="text"
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value)}
                 className="w-[250px] h-10 bg-white px-6 py-3 rounded-lg placeholder:text-[#EEEEEE] placeholder:text-sm"
                 placeholder="Enter your code"
               />
 
-              <button className="bg-[#FBC02D] text-[#333333] px-6 py-2.5 rounded-lg text-sm font-medium w-full md:w-auto">
-                Confirm
+              <button
+                type="button"
+                onClick={handleConfirmCoupon}
+                disabled={!couponInput.trim()}
+                className="bg-[#FBC02D] text-[#333333] px-6 py-2.5 rounded-lg text-sm font-medium w-full md:w-auto disabled:opacity-50"
+              >
+                {isCouponChecking ? "Checking..." : "Confirm"}
               </button>
             </div>
           </div>
@@ -121,21 +218,48 @@ const SecureCheckout = () => {
           <div className="w-full flex justify-between md:justify-end items-center gap-[118px] pt-3">
             <p className="text-[#5C5C5C] text-sm leading-6">Sub Total:</p>
             <p className="text-[#000000] text-sm md:text-xl font-medium leading-6">
-              $9.00 USD
+              $
+              {selectedPackage
+                ? Number(
+                    couponData?.total_price ??
+                      selectedPackage.originalPriceUSD ??
+                      selectedPackage.priceUSD ??
+                      0
+                  ).toFixed(2)
+                : "0.00"}{" "}
+              USD
             </p>
           </div>
           <div className="w-full flex justify-between md:justify-end items-center gap-[118px] py-6">
             <p className="text-[#5C5C5C] text-sm leading-6">Discount:</p>
             <p className="text-[#D32F2F] text-sm md:text-xl font-medium leading-6">
-              $9.00 USD
+              $
+              {selectedPackage
+                ? Number(
+                    couponData?.discount ??
+                      (selectedPackage.originalPriceUSD || selectedPackage.priceUSD || 0) -
+                        (selectedPackage.priceUSD || 0)
+                  ).toFixed(2)
+                : "0.00"}{" "}
+              USD
             </p>
           </div>
           <div className="w-full flex justify-between md:justify-end items-center gap-[118px] py-6 border-t border-b">
             <p className="text-[#5C5C5C] text-sm leading-6">Total Price:</p>
             <p className="text-[#000000] text-sm md:text-xl font-medium leading-6">
-              $9.00 USD
+              $
+              {selectedPackage
+                ? Number(couponData?.current_price ?? selectedPackage.priceUSD ?? 0).toFixed(2)
+                : "0.00"}{" "}
+              USD
             </p>
           </div>
+          {!!submitError && (
+            <p className="mt-3 text-sm text-[#FF4040]">{submitError}</p>
+          )}
+          {isCouponChecking && (
+            <p className="mt-3 text-sm text-[#767676]">Checking coupon...</p>
+          )}
         </div>
 
         <div className="flex flex-col lg:flex-row justify-between items-center pb-[55px]">
@@ -146,11 +270,14 @@ const SecureCheckout = () => {
               compatible and network-unlocked.
             </p>
           </div>
-          <Link href="/view-eSIM-details">
-            <Button className="h-12 w-[344px] text-base text-[#F4F4F4] leading-6">
-              COMPLETE ORDER
-            </Button>
-          </Link>
+          <Button
+            type="button"
+            disabled={!selectedPackage || isCheckoutLoading}
+            onClick={handleCompleteOrder}
+            className="h-12 w-[344px] text-base text-[#F4F4F4] leading-6 disabled:opacity-50"
+          >
+            {isCheckoutLoading ? "Processing..." : "COMPLETE ORDER"}
+          </Button>
         </div>
       </div>
     </div>

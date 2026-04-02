@@ -1,6 +1,5 @@
 "use client";
 
-
 import qrCode from "@/assests/qrCode.svg";
 import simThumb from "@/assests/simThumb.svg";
 import gb from "@/assests/gb.svg";
@@ -10,84 +9,56 @@ import calenderIcon from "@/assests/calenderIcon.svg";
 import Image from "next/image";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import ban from "@/assests/ban.png";
-import nepal from "@/assests/nepal.png";
-import australia from "@/assests/australia.png";
-import canada from "@/assests/canada.png";
-import germany from "@/assests/germany.png";
-import bahrain from "@/assests/bahrain.png";
-import japan from "@/assests/japan.png";
-import morocco from "@/assests/morocco.png";
-import newZealand from "@/assests/newZealand.png";
-import portugal from "@/assests/portugal.png";
-import southKorea from "@/assests/southKorea.png";
-import turkey from "@/assests/turkey.png";
-import uk from "@/assests/uk.png";
-import usa from "@/assests/usa.png";
 import { LucideCopy } from "lucide-react";
 import ShortBanner from "@/components/shared/ShortBanner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { getSelectedEsim } from "@/helpers/selectedEsim";
 
-const countries = [
-  {
-    label: "Bangladesh",
-    flag: ban,
-  },
-  {
-    label: "Nepal",
-    flag: nepal,
-  },
-  {
-    label: "Australia",
-    flag: australia,
-  },
-  {
-    label: "USA",
-    flag: usa,
-  },
-  {
-    label: "UK",
-    flag: uk,
-  },
-  {
-    label: "Canada",
-    flag: canada,
-  },
-  {
-    label: "Germany",
-    flag: germany,
-  },
-  {
-    label: "Bahrain",
-    flag: bahrain,
-  },
-  {
-    label: "Japan",
-    flag: japan,
-  },
-  {
-    label: "Morocco",
-    flag: morocco,
-  },
-  {
-    label: "Portugal",
-    flag: portugal,
-  },
-  {
-    label: "New Zealand",
-    flag: newZealand,
-  },
-  {
-    label: "South Korea",
-    flag: southKorea,
-  },
-  {
-    label: "Turkey",
-    flag: turkey,
-  },
-];
+function parseDataGb(dataAmount) {
+  if (!dataAmount) return null;
+  const lower = String(dataAmount).toLowerCase();
+  if (lower.includes("unlimited")) return null;
+  const match = lower.match(/([\d.]+)\s*gb/);
+  if (!match) return null;
+  return Number(match[1]);
+}
+
+function parseDurationDays(duration) {
+  if (!duration) return null;
+  const match = String(duration).match(/(\d+)/);
+  if (!match) return null;
+  return Number(match[1]);
+}
 
 const ViewEsimDetails = () => {
+  const searchParams = useSearchParams();
+  const packageId = searchParams.get("packageId");
+  const [selectedPackage, setSelectedPackage] = useState(null);
+
+  useEffect(() => {
+    const stored = getSelectedEsim();
+    if (stored && (!packageId || stored.packageId === packageId)) {
+      setSelectedPackage(stored);
+    }
+  }, [packageId]);
+
+  const supportedCountries = selectedPackage?.supported_countries ?? [];
+
+  const dataGb = useMemo(
+    () => parseDataGb(selectedPackage?.dataAmount),
+    [selectedPackage?.dataAmount]
+  );
+  const durationDays = useMemo(
+    () => parseDurationDays(selectedPackage?.duration),
+    [selectedPackage?.duration]
+  );
+
+  const dataProgress = dataGb == null ? 100 : Math.min(100, (dataGb / 30) * 100);
+  const durationProgress =
+    durationDays == null ? 100 : Math.min(100, (durationDays / 30) * 100);
+
   return (
     <div className="bg-[#F7F7F7]">
       <ShortBanner text="View eSIM Details" />
@@ -103,15 +74,17 @@ const ViewEsimDetails = () => {
             }}
           >
             <div className="flex items-end gap-[30px] pb-3">
-              <Image
-                className="w-[201px] h-[127px] rounded-lg"
-                src={simThumb}
-                alt="Sim thumbnail"
+              <img
+                className="w-[201px] h-[127px] rounded-lg object-cover"
+                src={selectedPackage?.operatorImage || simThumb.src}
+                alt={selectedPackage?.operatorName || "Sim thumbnail"}
               />
               <div className="pb-1">
-                <h2 className="text-xl leading-5 text-[#333333]">Fatafati</h2>
+                <h2 className="text-xl leading-5 text-[#333333]">
+                  {selectedPackage?.operatorName || "No package selected"}
+                </h2>
                 <p className="text-primary text-sm leading-5 mt-5 font-normal">
-                  Bangladesh
+                  {selectedPackage?.countryName || "Select a package first"}
                 </p>
               </div>
             </div>
@@ -120,7 +93,9 @@ const ViewEsimDetails = () => {
               <div className="flex justify-between items-center bg-[#EEEEEE] rounded-lg px-5 pt-3 pb-5">
                 <div className="w-1/2">
                   <Image className="w-5 h-5" src={gb} alt="Data Icon" />
-                  <p className="text-xl leading-5 mt-3">18 GB</p>
+                  <p className="text-xl leading-5 mt-3">
+                    {selectedPackage?.dataAmount || "N/A"}
+                  </p>
                 </div>
                 <div>
                   <CircularProgressbar
@@ -131,7 +106,7 @@ const ViewEsimDetails = () => {
                       strokeLinecap: "butt",
                     })}
                     strokeWidth={16}
-                    value={66}
+                    value={dataProgress}
                     className="w-16 h-16"
                   />
                 </div>
@@ -144,7 +119,9 @@ const ViewEsimDetails = () => {
                     src={calenderIcon}
                     alt="Data Icon"
                   />
-                  <p className="text-xl leading-5 mt-3">3 Day</p>
+                  <p className="text-xl leading-5 mt-3">
+                    {selectedPackage?.duration || "N/A"}
+                  </p>
                 </div>
                 <div>
                   <CircularProgressbar
@@ -155,7 +132,7 @@ const ViewEsimDetails = () => {
                       strokeLinecap: "butt",
                     })}
                     strokeWidth={16}
-                    value={66}
+                    value={durationProgress}
                     className="w-16 h-16"
                   />
                 </div>
@@ -164,7 +141,7 @@ const ViewEsimDetails = () => {
               <div className="flex justify-between items-center bg-[#EEEEEE] rounded-lg px-5 pt-3 pb-5">
                 <div className="w-1/2">
                   <Image className="w-5 h-5" src={call} alt="Data Icon" />
-                  <p className="text-xl leading-5 mt-3">5 Min</p>
+                  <p className="text-xl leading-5 mt-3">N/A</p>
                 </div>
                 <div>
                   <CircularProgressbar
@@ -175,7 +152,7 @@ const ViewEsimDetails = () => {
                       strokeLinecap: "butt",
                     })}
                     strokeWidth={16}
-                    value={66}
+                    value={0}
                     className="w-16 h-16"
                   />
                 </div>
@@ -184,7 +161,7 @@ const ViewEsimDetails = () => {
               <div className="flex justify-between items-center bg-[#EEEEEE] rounded-lg px-5 pt-3 pb-5">
                 <div className="w-1/2">
                   <Image className="w-5 h-5" src={chating} alt="Data Icon" />
-                  <p className="text-xl leading-5 mt-3">8 SMS</p>
+                  <p className="text-xl leading-5 mt-3">N/A</p>
                 </div>
                 <div>
                   <CircularProgressbar
@@ -195,7 +172,7 @@ const ViewEsimDetails = () => {
                       strokeLinecap: "butt",
                     })}
                     strokeWidth={16}
-                    value={66}
+                    value={0}
                     className="w-16 h-16"
                   />
                 </div>
@@ -206,29 +183,37 @@ const ViewEsimDetails = () => {
               <ul className="mt-3 text-sm space-y-4">
                 <li className="flex justify-between items-center max-w-[170px]">
                   <p className="text-[#5C5C5C] leading-5 opacity-80">Data</p>{" "}
-                  <p className="text-[#333333] leading-5 opacity-80">2 GB</p>
+                  <p className="text-[#333333] leading-5 opacity-80">
+                    {selectedPackage?.dataAmount || "N/A"}
+                  </p>
                 </li>
 
                 <li className="flex justify-between items-center max-w-[170px]">
                   <p className="text-[#5C5C5C] leading-5 opacity-80">
                     Validity
                   </p>{" "}
-                  <p className="text-[#333333] leading-5 opacity-80">7 Day</p>
+                  <p className="text-[#333333] leading-5 opacity-80">
+                    {selectedPackage?.duration || "N/A"}
+                  </p>
                 </li>
 
                 <li className="flex justify-between items-center">
                   <div className="flex justify-between items-center max-w-[170px] w-full">
                     <p className="text-[#5C5C5C] leading-5 opacity-80">Price</p>{" "}
                     <p className="text-[#333333] leading-5 opacity-80">
-                      $2.00 USD
+                      $
+                      {selectedPackage
+                        ? Number(selectedPackage.priceUSD || 0).toFixed(2)
+                        : "0.00"}{" "}
+                      USD
                     </p>
                   </div>
                   <div className="flex justify-between items-center gap-1">
                     <p className="text-[#5C5C5C] leading-5 opacity-80">
-                      Start date:
+                      Package ID:
                     </p>{" "}
                     <p className="text-[#5C5C5C] leading-5 opacity-80">
-                      27 Apr, 2025
+                      {selectedPackage?.packageId || "N/A"}
                     </p>
                   </div>
                 </li>
@@ -240,18 +225,18 @@ const ViewEsimDetails = () => {
                   Supported Country
                 </h3>
                 <ul className="grid grid-cols-2 md:grid-cols-4">
-                  {countries?.map((country) => (
+                  {supportedCountries?.map((country, cIdx) => (
                     <li
-                      key={country?.label}
+                      key={`${country?.country_code ?? "c"}-${cIdx}`}
                       className="flex items-center gap-3 px-2 py-3"
                     >
-                      <Image
-                        src={country?.flag}
-                        className="w-5 h-3"
-                        alt="Bangladesh Flag"
+                      <img
+                        src={country?.image?.url}
+                        className="w-5 h-3 object-cover"
+                        alt={country?.title}
                       />{" "}
                       <p className="text-xs text-[#767676] leading-5">
-                        {country?.label}
+                        {country?.title}
                       </p>
                     </li>
                   ))}
@@ -284,6 +269,14 @@ const ViewEsimDetails = () => {
                 src={qrCode}
                 alt="QR Code"
               />
+              {selectedPackage?.qr_installation && (
+                <div
+                  className="text-xs text-[#5C5C5C] leading-5 text-left w-full"
+                  dangerouslySetInnerHTML={{
+                    __html: selectedPackage.qr_installation,
+                  }}
+                />
+              )}
               <p className="text-center text-[#A1A1A1] text-xs leading-5">
                 Scan the QR code by printing it out or displaying it on another
                 device to install your eSIM. "Make sure your device has a stable
@@ -295,24 +288,24 @@ const ViewEsimDetails = () => {
               <div className="p-3 bg-[#FDFDFD] rounded-md">
                 <div className="flex justify-between">
                   <p className="text-[#A1A1A1] text-[10px] leading-3">
-                    SM-DP+ ADDRESS
+                    Manual installation
                   </p>
                   <LucideCopy size={20} className="cursor-pointer" />
                 </div>
                 <p className="text-[#5C5C5C] text-sm leading-5">
-                  sin.prod.ondemandconnectivity.com
+                  See instructions below
                 </p>
               </div>
 
               <div className="p-3 bg-[#FDFDFD] rounded-md">
                 <div className="flex justify-between">
                   <p className="text-[#A1A1A1] text-[10px] leading-3">
-                    Activation Code
+                    Package ID
                   </p>
                   <LucideCopy size={20} className="cursor-pointer" />
                 </div>
                 <p className="text-[#5C5C5C] text-sm leading-5 pr-5 break-all">
-                  05A094A18461E8C918413C8DDFC7DAC025141102150B88F15C5282C6A6ED98E8
+                  {selectedPackage?.packageId || "N/A"}
                 </p>
               </div>
               <p className="text-[#A1A1A1] text-xs leading-4 mt-4">
@@ -321,6 +314,15 @@ const ViewEsimDetails = () => {
                 connection before installing."
               </p>
             </div>
+
+            {selectedPackage?.manual_installation && (
+              <div
+                className="mt-4 text-xs text-[#767676] leading-5"
+                dangerouslySetInnerHTML={{
+                  __html: selectedPackage.manual_installation,
+                }}
+              />
+            )}
           </div>
         </div>
 

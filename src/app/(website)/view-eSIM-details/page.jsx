@@ -1,11 +1,12 @@
-
 import ViewEsimDetails from "@/components/website/vieweSIMDetails/ViewEsimDetails";
-import React from "react";
+import React, { Suspense } from "react";
 
 const page = () => {
   return (
     <div>
-      <ViewEsimDetails />
+      <Suspense fallback={<p className="p-6 text-sm text-[#767676]">Loading...</p>}>
+        <ViewEsimDetails />
+      </Suspense>
     </div>
   );
 };

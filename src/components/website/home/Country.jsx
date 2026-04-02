@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
+import { asArray, cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import stateMap from "@/assests/stateMap.svg";
 import Image from "next/image";
@@ -22,6 +22,7 @@ import {
   useGetCountriesBasedOnRegionQuery,
   useGetRegionsQuery,
 } from "@/helpers/regionsApi";
+import { useGetEsimsQuery, useGetEsimRegionsQuery } from "@/helpers/eSimApi";
 
 const categories = [
   {
@@ -39,20 +40,26 @@ const Country = () => {
   const url = pathname;
 
   const [region, setRegion] = useState("Local");
-  const [stateStatus, setStateStatus] = useState("Oceania");
+  const [stateStatus, setStateStatus] = useState("Asia");
   const [categoryState, setCategoryState] = useState("Date");
-  const [showCard, setShowCard] = useState("");
+
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedRegionalSlug, setSelectedRegionalSlug] = useState(null);
+  const [selectedRegionalName, setSelectedRegionalName] = useState("");
+
   const [searchText, setSearchText] = useState("");
+  const [packageSearch, setPackageSearch] = useState("");
+  const [globalSearch, setGlobalSearch] = useState("");
 
   const { data: regionsResponse, isLoading: isRegionsLoading } =
     useGetRegionsQuery();
-  const localTabs = regionsResponse?.data?.countrysRegions ?? [];
-  const regionalItems = regionsResponse?.data?.subregions ?? [];
+  const localTabs = asArray(regionsResponse?.data?.countrysRegions);
+  const regionalItems = asArray(regionsResponse?.data?.subregions);
 
   useEffect(() => {
     if (!localTabs.length) return;
     if (!localTabs.includes(stateStatus)) {
-      setStateStatus(localTabs.includes("Oceania") ? "Oceania" : localTabs[0]);
+      setStateStatus(localTabs.includes("Asia") ? "Asia" : localTabs[0]);
     }
   }, [localTabs, stateStatus]);
 
@@ -66,7 +73,7 @@ const Country = () => {
 
   const countries = useMemo(
     () =>
-      (countriesResponse?.data ?? []).filter((country) =>
+      asArray(countriesResponse?.data).filter((country) =>
         country?.name?.toLowerCase().includes(searchText.toLowerCase())
       ),
     [countriesResponse?.data, searchText]
@@ -81,20 +88,99 @@ const Country = () => {
     [regionalItems, searchText]
   );
 
+  const {
+    data: localPackagesResponse,
+    isLoading: isLocalPackagesLoading,
+    isFetching: isLocalPackagesFetching,
+  } = useGetEsimsQuery(
+    {
+      type: "local",
+      country: selectedCountry?.cca2,
+      page: 1,
+      limit: 12,
+    },
+    { skip: region !== "Local" || !selectedCountry?.cca2 }
+  );
+
+  const {
+    data: regionalPackagesResponse,
+    isLoading: isRegionalPackagesLoading,
+    isFetching: isRegionalPackagesFetching,
+  } = useGetEsimRegionsQuery(
+    { slug: selectedRegionalSlug, page: 1, limit: 12 },
+    { skip: region !== "Regional" || !selectedRegionalSlug }
+  );
+
+  const {
+    data: globalPackagesResponse,
+    isLoading: isGlobalPackagesLoading,
+    isFetching: isGlobalPackagesFetching,
+  } = useGetEsimsQuery(
+    { type: "global", page: 1, limit: 12 },
+    { skip: region !== "Global" }
+  );
+
+  const localPackages = useMemo(() => {
+    const list = asArray(localPackagesResponse?.data);
+    return list.filter((item) =>
+      `${item?.operatorName || ""} ${item?.countryName || ""} ${
+        item?.packageId || ""
+      }`
+        .toLowerCase()
+        .includes(packageSearch.toLowerCase())
+    );
+  }, [localPackagesResponse?.data, packageSearch]);
+
+  const regionalPackages = useMemo(() => {
+    const list = asArray(regionalPackagesResponse?.data);
+    return list.filter((item) =>
+      `${item?.operatorName || ""} ${item?.countryName || ""} ${
+        item?.packageId || ""
+      }`
+        .toLowerCase()
+        .includes(packageSearch.toLowerCase())
+    );
+  }, [regionalPackagesResponse?.data, packageSearch]);
+
+  const globalPackages = useMemo(() => {
+    const list = asArray(globalPackagesResponse?.data);
+    return list.filter((item) =>
+      `${item?.operatorName || ""} ${item?.countryName || ""} ${
+        item?.packageId || ""
+      }`
+        .toLowerCase()
+        .includes(globalSearch.toLowerCase())
+    );
+  }, [globalPackagesResponse?.data, globalSearch]);
+
+  const resetSelections = () => {
+    setSelectedCountry(null);
+    setSelectedRegionalSlug(null);
+    setSelectedRegionalName("");
+    setPackageSearch("");
+  };
+
   const handleRegionChange = (value) => {
     setRegion(value);
-    setShowCard("");
+    resetSelections();
     setSearchText("");
+    setGlobalSearch("");
     if (value === "Local") {
-      setStateStatus(localTabs.includes("Oceania") ? "Oceania" : localTabs[0] ?? "Oceania");
+      setStateStatus(
+        localTabs.includes("Asia") ? "Asia" : localTabs[0] ?? "Asia"
+      );
     }
   };
 
-  const renderSearchInput = (className = "py-1.5 px-4 focus:outline-none") => (
+  const renderSearchInput = (
+    value,
+    onChange,
+    className = "py-1.5 px-4 focus:outline-none"
+  ) => (
     <input
       type="text"
-      value={searchText}
-      onChange={(e) => setSearchText(e.target.value)}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
       placeholder="Search your Choice"
       className={className}
     />
@@ -132,18 +218,20 @@ const Country = () => {
 
         {region === "Local" && (
           <div>
-            {showCard ? (
+            {selectedCountry ? (
               <div>
-                {/* state category & search bar */}
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-6 border-b-2 pb-5 border-[#EEEEEE]">
                   <button
-                    onClick={() => setShowCard("")}
+                    onClick={() => {
+                      setSelectedCountry(null);
+                      setPackageSearch("");
+                    }}
                     className="cursor-pointer text-[#6B6B6B] font-semibold flex items-center gap-2"
                   >
-                    <GoArrowLeft className="text-xl" /> <span>{showCard}</span>
+                    <GoArrowLeft className="text-xl" />{" "}
+                    <span>{selectedCountry?.name}</span>
                   </button>
 
-                  {/* search bar and filter button */}
                   <div className="flex items-center gap-2 w-full md:w-auto">
                     <div
                       className="flex items-center rounded-full px-2 w-[70%] md:w-[280px]"
@@ -151,14 +239,10 @@ const Country = () => {
                         boxShadow: "0px 1px 4px 0px rgba(208, 208, 208, 0.50)",
                       }}
                     >
-                      <button>
+                      <button type="button">
                         <Search className="text-primary" />
                       </button>
-                      <input
-                        type="text"
-                        placeholder="Search your Choice"
-                        className="py-1.5 px-4 focus:outline-none"
-                      />
+                      {renderSearchInput(packageSearch, setPackageSearch)}
                     </div>
 
                     <DropdownMenu>
@@ -178,28 +262,34 @@ const Country = () => {
                   </div>
                 </div>
 
-                {/* sim cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-6 mt-6">
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
+                  {isLocalPackagesLoading || isLocalPackagesFetching ? (
+                    <p className="col-span-full text-sm text-[#767676]">
+                      Loading packages...
+                    </p>
+                  ) : localPackages.length ? (
+                    localPackages.map((pkg, index) => (
+                      <SimCard
+                        key={`${pkg.packageId}-${pkg.slug ?? "pkg"}-${index}`}
+                        packageData={pkg}
+                      />
+                    ))
+                  ) : (
+                    <p className="col-span-full text-sm text-[#767676]">
+                      No packages found for {selectedCountry?.name}.
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
               <div>
-                {/* state category & search bar */}
                 <div className="flex flex-col lg:flex-row justify-center lg:items-center gap-6 lg:gap-2 border-b-2 pb-5 border-[#EEEEEE]">
                   <div className="flex items-center flex-wrap gap-2">
                     {localTabs?.map((state) => (
                       <button
                         onClick={() => {
                           setStateStatus(state);
-                          setShowCard("");
+                          setSelectedCountry(null);
                         }}
                         className={cn(
                           "px-3 py-1.5 rounded cursor-pointer text-xs md:text-sm",
@@ -219,16 +309,17 @@ const Country = () => {
                       boxShadow: "0px 1px 4px 0px rgba(208, 208, 208, 0.50)",
                     }}
                   >
-                    <button>
+                    <button type="button">
                       <Search className="text-primary" />
                     </button>
-                    {renderSearchInput()}
+                    {renderSearchInput(searchText, setSearchText)}
                   </div>
                 </div>
 
-                {/* country cards */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mt-6">
-                  {isRegionsLoading || isCountriesLoading || isCountriesFetching ? (
+                  {isRegionsLoading ||
+                  isCountriesLoading ||
+                  isCountriesFetching ? (
                     <p className="col-span-full text-sm text-[#767676]">
                       Loading countries...
                     </p>
@@ -236,7 +327,7 @@ const Country = () => {
                     (url?.includes("shop") ? countries : shortList).map(
                       (country, idx) => (
                         <div
-                          onClick={() => setShowCard(country?.name)}
+                          onClick={() => setSelectedCountry(country)}
                           key={idx}
                           className="flex items-center gap-3 py-4 px-7 rounded-full cursor-pointer"
                           style={{
@@ -278,18 +369,21 @@ const Country = () => {
 
         {region === "Regional" && (
           <div>
-            {showCard ? (
+            {selectedRegionalSlug ? (
               <div>
-                {/* state category & search bar */}
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-6 border-b-2 pb-5 border-[#EEEEEE] max-w-s">
                   <button
-                    onClick={() => setShowCard("")}
+                    onClick={() => {
+                      setSelectedRegionalSlug(null);
+                      setSelectedRegionalName("");
+                      setPackageSearch("");
+                    }}
                     className="cursor-pointer text-[#6B6B6B] font-semibold flex items-center gap-2"
                   >
-                    <GoArrowLeft className="text-xl" /> <span>{showCard}</span>
+                    <GoArrowLeft className="text-xl" />{" "}
+                    <span>{selectedRegionalName}</span>
                   </button>
 
-                  {/* search bar and filter button */}
                   <div className="flex items-center gap-2 w-full md:w-auto">
                     <div
                       className="flex items-center rounded-full px-2 w-[70%] md:w-[280px]"
@@ -297,14 +391,10 @@ const Country = () => {
                         boxShadow: "0px 1px 4px 0px rgba(208, 208, 208, 0.50)",
                       }}
                     >
-                      <button>
+                      <button type="button">
                         <Search className="text-primary" />
                       </button>
-                      <input
-                        type="text"
-                        placeholder="Search your Choice"
-                        className="py-1.5 px-4 focus:outline-none"
-                      />
+                      {renderSearchInput(packageSearch, setPackageSearch)}
                     </div>
 
                     <DropdownMenu>
@@ -324,16 +414,23 @@ const Country = () => {
                   </div>
                 </div>
 
-                {/* sim cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-6 mt-6">
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
-                  <SimCard />
+                  {isRegionalPackagesLoading || isRegionalPackagesFetching ? (
+                    <p className="col-span-full text-sm text-[#767676]">
+                      Loading packages...
+                    </p>
+                  ) : regionalPackages.length ? (
+                    regionalPackages.map((pkg, index) => (
+                      <SimCard
+                        key={`${pkg.packageId}-${pkg.slug ?? "pkg"}-${index}`}
+                        packageData={pkg}
+                      />
+                    ))
+                  ) : (
+                    <p className="col-span-full text-sm text-[#767676]">
+                      No packages found for this region.
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
@@ -345,7 +442,11 @@ const Country = () => {
                 ) : filteredRegionalItems.length ? (
                   filteredRegionalItems?.map((state) => (
                     <div
-                      onClick={() => setShowCard(state?.name)}
+                      onClick={() => {
+                        setSelectedRegionalSlug(state?.slugname);
+                        setSelectedRegionalName(state?.name);
+                        setPackageSearch("");
+                      }}
                       key={state?.slugname}
                       className="flex items-center gap-3 px-4 md:px-7 rounded-full cursor-pointer lg:w-[364px] h-16 md:h-20 bg-[#FDFDFD] hover:bg-[#e6f5ee]"
                       style={{
@@ -380,7 +481,6 @@ const Country = () => {
 
         {region === "Global" && (
           <div>
-            {/* state category & search bar */}
             <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-6 md:gap-2 border-b-2 pb-5 border-[#EEEEEE] max-w-screen">
               <div className="flex items-center gap-2">
                 {categories?.map((category) => (
@@ -399,7 +499,6 @@ const Country = () => {
                 ))}
               </div>
 
-              {/* search bar and filter button */}
               <div className="flex items-center gap-2 w-full md:w-auto">
                 <div
                   className="flex items-center rounded-full px-2 w-[70%] md:w-[280px]"
@@ -407,14 +506,10 @@ const Country = () => {
                     boxShadow: "0px 1px 4px 0px rgba(208, 208, 208, 0.50)",
                   }}
                 >
-                  <button>
+                  <button type="button">
                     <Search className="text-primary" />
                   </button>
-                  <input
-                    type="text"
-                    placeholder="Search your Choice"
-                    className="py-1.5 px-4 focus:outline-none"
-                  />
+                  {renderSearchInput(globalSearch, setGlobalSearch)}
                 </div>
 
                 <DropdownMenu>
@@ -433,16 +528,23 @@ const Country = () => {
               </div>
             </div>
 
-            {/* sim cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-6 mt-6">
-              <SimCard />
-              <SimCard />
-              <SimCard />
-              <SimCard />
-              <SimCard />
-              <SimCard />
-              <SimCard />
-              <SimCard />
+              {isGlobalPackagesLoading || isGlobalPackagesFetching ? (
+                <p className="col-span-full text-sm text-[#767676]">
+                  Loading global packages...
+                </p>
+              ) : globalPackages.length ? (
+                globalPackages.map((pkg, index) => (
+                  <SimCard
+                    key={`${pkg.packageId}-${pkg.slug ?? "pkg"}-${index}`}
+                    packageData={pkg}
+                  />
+                ))
+              ) : (
+                <p className="col-span-full text-sm text-[#767676]">
+                  No global packages found.
+                </p>
+              )}
             </div>
           </div>
         )}
