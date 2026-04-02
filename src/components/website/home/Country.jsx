@@ -40,7 +40,7 @@ const Country = () => {
   const url = pathname;
 
   const [region, setRegion] = useState("Local");
-  const [stateStatus, setStateStatus] = useState("Asia");
+  const [stateStatus, setStateStatus] = useState("Oceania");
   const [categoryState, setCategoryState] = useState("Date");
 
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -59,7 +59,7 @@ const Country = () => {
   useEffect(() => {
     if (!localTabs.length) return;
     if (!localTabs.includes(stateStatus)) {
-      setStateStatus(localTabs.includes("Asia") ? "Asia" : localTabs[0]);
+      setStateStatus(localTabs.includes("Oceania") ? "Oceania" : localTabs[0]);
     }
   }, [localTabs, stateStatus]);
 
@@ -167,7 +167,7 @@ const Country = () => {
     setGlobalSearch("");
     if (value === "Local") {
       setStateStatus(
-        localTabs.includes("Asia") ? "Asia" : localTabs[0] ?? "Asia"
+          localTabs.includes("Oceania") ? "Oceania" : localTabs[0] ?? "Oceania"
       );
     }
   };

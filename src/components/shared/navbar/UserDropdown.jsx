@@ -17,24 +17,53 @@ import earnIcon from "@/assests/earn.svg";
 import Link from "next/link";
 import { useModal } from "@/contexts/ModalContext";
 import { notifyAuthChange } from "@/helpers/authEvents";
+import { useGetMyProfileQuery } from "@/helpers/authApi";
+import { imageUrl } from "@/components/shared/getImageUrl";
 
 const UserDropdown = () => {
   const { openFeedbackModal } = useModal();
+  const { data } = useGetMyProfileQuery();
+  const profile = data?.data ?? null;
+  const avatarSrc = imageUrl(profile?.image);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     notifyAuthChange();
   };
+
   return (
     <div>
       <DropdownMenu>
         <DropdownMenuTrigger className="bg-[#F7F7F7] border-none cursor-pointer rounded-full shadow flex justify-center items-center gap-2 p-0.5 pr-2 focus:outline-none">
-          <Image className="w-10 h-10" src={userImg} alt="User Image" />
+          {avatarSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatarSrc}
+              alt={profile?.name ? `${profile.name} profile` : "Profile"}
+              className="w-10 h-10 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <Image
+              className="w-10 h-10 rounded-full object-cover"
+              src={userImg}
+              alt="User"
+            />
+          )}
           <IoIosArrowDown className="text-primary text-xl" />
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end">
           <Link href={"/account"}>
             <DropdownMenuItem>
-              <Image className="w-6 h-6" src={userImg} alt="User Image" />
+              {avatarSrc ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarSrc}
+                  alt=""
+                  className="w-6 h-6 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <Image className="w-6 h-6" src={userImg} alt="" />
+              )}
               <span>My Account</span>
             </DropdownMenuItem>
           </Link>

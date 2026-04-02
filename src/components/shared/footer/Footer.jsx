@@ -87,7 +87,7 @@ const Footer = () => {
 
       <div className="border-t border-[#767676] py-4 text-center">
         <p className="text-[#EEEEEE] text-sm">
-          © Copyright UX/UI 2025 LinkFast
+          © Copyright  {new Date().getFullYear()} LinkFast
         </p>
       </div>
     </footer>
