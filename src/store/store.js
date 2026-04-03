@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { baseApi } from "@/helpers/baseApi";
 import "@/helpers/authApi";
+import "@/helpers/inviteEarnApi";
 
 export function makeStore(preloadedState) {
   return configureStore({
