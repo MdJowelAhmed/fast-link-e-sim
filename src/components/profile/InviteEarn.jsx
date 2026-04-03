@@ -3,10 +3,15 @@
 import React, { useMemo } from "react";
 import ShortBanner from "../shared/ShortBanner";
 import { cn } from "@/lib/utils";
-import { useGetInviteEarnQuery } from "@/helpers/inviteEarnApi";
+import {
+  useGetInviteEarnQuery,
+  useConnectYourStripeAccountMutation,
+} from "@/helpers/inviteEarnApi";
+import { useGetMyProfileQuery } from "@/helpers/authApi";
 import ReferralSharePanel from "@/components/shared/ReferralSharePanel";
 import { Button } from "@/components/ui/button";
 import Loading from "@/app/loading";
+import toast from "react-hot-toast";
 
 function formatMoney(value) {
   if (value == null || Number.isNaN(Number(value))) return "$0.00";
@@ -15,9 +20,31 @@ function formatMoney(value) {
 
 const InviteEarn = () => {
   const { data, isLoading, isError, refetch } = useGetInviteEarnQuery();
+  const { data: profileRes } = useGetMyProfileQuery();
+  const [connectStripe, { isLoading: isConnectingStripe }] =
+    useConnectYourStripeAccountMutation();
 
   const stats = data?.data;
-  console.log(stats);
+  const isInfluencer = profileRes?.data?.role === "INFLUENCER";
+
+  const handleConnectStripe = async () => {
+    try {
+      const res = await connectStripe().unwrap();
+      const url = res?.data?.data;
+      if (typeof url === "string" && /^https?:\/\//i.test(url)) {
+        window.location.assign(url);
+        return;
+      }
+      toast.error(res?.message || "No Stripe setup link received.");
+    } catch (err) {
+      const message =
+        err?.data?.message ??
+        err?.data?.error ??
+        err?.error ??
+        "Could not start Stripe connection.";
+      toast.error(typeof message === "string" ? message : "Request failed.");
+    }
+  };
 
   const cards = useMemo(() => {
     if (!stats) return [];
@@ -48,6 +75,19 @@ const InviteEarn = () => {
   return (
     <div className="bg-[#F7F7F7]">
       <ShortBanner text={"Invite & Earn"} />
+
+      {isInfluencer ? (
+        <div className="flex justify-end items-center w-full mt-6 max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8">
+          <Button
+            type="button"
+            onClick={handleConnectStripe}
+            className="h-[45px]"
+            disabled={isConnectingStripe}
+          >
+            {isConnectingStripe ? "Connecting…" : "Connect Your Stripe Account"}
+          </Button>
+        </div>
+      ) : null}
       <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-10 min-h-[76vh] py-10">
         {isLoading ? (
           <div className="flex min-h-[40vh] items-center justify-center w-full">
