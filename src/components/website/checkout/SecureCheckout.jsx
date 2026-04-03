@@ -160,58 +160,45 @@ const SecureCheckout = () => {
           </div>
         </div>
 
-        <div className="w-full py-10 xl:py-20">
-          <h4 className="text-[#000000] text-xl leading-6 pb-3">
-            Choose Payment Method
-          </h4>
-          <p className="text-[#A1A1A1] text-sm leading-6 pb-6">
-            You can choose or change the payment method to complete your order.
-          </p>
-          <Select>
-            <SelectTrigger
-              className="w-full !h-[68px] bg-[#FDFDFD]"
-              style={{
-                boxShadow: "0px 8px 7px 2px rgba(96, 96, 96, 0.05)",
-              }}
-            >
-              <SelectValue placeholder="Choose Payment Method" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Google Pay">Google Pay</SelectItem>
-              <SelectItem value="Binance">Binance</SelectItem>
-              <SelectItem value="Apple Pay">Apple Pay</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
 
-        <div className="pb-6">
+
+        <div className="py-6">
           <h4 className="text-[#000000] text-xl leading-6 pb-3">
             Order Summary
           </h4>
-          <p className="text-[#A1A1A1] text-sm leading-6 pb-6">
-            You can review your order summary.
-          </p>
-          <div className="pt-6 mb-5 xl:mb-16 flex flex-col md:flex-row  justify-between border-t">
+
+          <div className="pt-6 mb-5 xl:mb-10 flex flex-col md:flex-row  justify-between ">
             <h3 className="mb-4 text-sm text-[#BBBBBB]">
               Enter your coupon code :
             </h3>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={couponInput}
-                onChange={(e) => setCouponInput(e.target.value)}
-                className="w-[250px] h-10 bg-white px-6 py-3 rounded-lg placeholder:text-[#EEEEEE] placeholder:text-sm"
-                placeholder="Enter your code"
-              />
+            <div className="flex flex-col   gap-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  className="w-[250px] h-[45px] bg-white px-6 py-3 rounded-lg placeholder:text-[#EEEEEE] placeholder:text-sm"
+                  placeholder="Enter your code"
+                />
 
-              <button
-                type="button"
-                onClick={handleConfirmCoupon}
-                disabled={!couponInput.trim()}
-                className="bg-[#FBC02D] text-[#333333] px-6 py-2.5 rounded-lg text-sm font-medium w-full md:w-auto disabled:opacity-50"
-              >
-                {isCouponChecking ? "Checking..." : "Confirm"}
-              </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmCoupon}
+                  disabled={!couponInput.trim()}
+                  className="bg-[#FBC02D] text-[#333333] px-6 py-2.5 rounded-lg text-sm font-medium w-full md:w-auto disabled:opacity-50"
+                >
+                  {isCouponChecking ? "Checking..." : "Confirm"}
+                </button>
+              </div>
+              <div>
+                {!!submitError && (
+                  <p className="mt-3 text-sm text-[#FF4040]">{submitError}</p>
+                )}
+                {isCouponChecking && (
+                  <p className="mt-3 text-sm text-[#767676]">Checking coupon...</p>
+                )}
+              </div>
+
             </div>
           </div>
 
@@ -221,11 +208,11 @@ const SecureCheckout = () => {
               $
               {selectedPackage
                 ? Number(
-                    couponData?.total_price ??
-                      selectedPackage.originalPriceUSD ??
-                      selectedPackage.priceUSD ??
-                      0
-                  ).toFixed(2)
+                  couponData?.total_price ??
+                  selectedPackage.originalPriceUSD ??
+                  selectedPackage.priceUSD ??
+                  0
+                ).toFixed(2)
                 : "0.00"}{" "}
               USD
             </p>
@@ -236,10 +223,10 @@ const SecureCheckout = () => {
               $
               {selectedPackage
                 ? Number(
-                    couponData?.discount ??
-                      (selectedPackage.originalPriceUSD || selectedPackage.priceUSD || 0) -
-                        (selectedPackage.priceUSD || 0)
-                  ).toFixed(2)
+                  couponData?.discount ??
+                  (selectedPackage.originalPriceUSD || selectedPackage.priceUSD || 0) -
+                  (selectedPackage.priceUSD || 0)
+                ).toFixed(2)
                 : "0.00"}{" "}
               USD
             </p>
@@ -254,12 +241,7 @@ const SecureCheckout = () => {
               USD
             </p>
           </div>
-          {!!submitError && (
-            <p className="mt-3 text-sm text-[#FF4040]">{submitError}</p>
-          )}
-          {isCouponChecking && (
-            <p className="mt-3 text-sm text-[#767676]">Checking coupon...</p>
-          )}
+
         </div>
 
         <div className="flex flex-col lg:flex-row justify-between items-center pb-[55px]">
