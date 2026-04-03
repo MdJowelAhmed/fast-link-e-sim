@@ -6,6 +6,7 @@ import React, { Suspense } from "react";
 import Ad from "@/components/website/home/Ad";
 import { useGetBlogsQuery } from "@/helpers/blogsApi";
 import { useRouter, useSearchParams } from "next/navigation";
+import Loading from "@/app/loading";
 
 const BlogsContent = () => {
   const router = useRouter();
@@ -31,8 +32,8 @@ const BlogsContent = () => {
       <ShortBanner text="LinkFast Blogs" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[30px] max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 mt-6 mb-[60px]">
         {isLoading ? (
-          <div className="col-span-full text-center py-10 text-sm text-[#5C5C5C]">
-            Loading blogs...
+          <div className="col-span-full flex justify-center items-center w-full">
+            <Loading />
           </div>
         ) : blogs.length > 0 ? (
           blogs.map((blog) => (
@@ -45,7 +46,7 @@ const BlogsContent = () => {
             />
           ))
         ) : (
-          <div className="col-span-full text-center py-10 text-sm text-[#5C5C5C]">
+          <div className="col-span-full flex justify-center items-center w-full">
             No blogs found.
           </div>
         )}
@@ -103,7 +104,7 @@ const page = () => {
     <Suspense
       fallback={
         <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center text-sm text-[#5C5C5C]">
-          Loading blogs...
+          <Loading />
         </div>
       }
     >

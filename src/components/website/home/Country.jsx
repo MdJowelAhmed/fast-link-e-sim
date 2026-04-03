@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useState } from "react";
 import { asArray, cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import stateMap from "@/assests/stateMap.svg";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IoFilterOutline } from "react-icons/io5";
 import {
@@ -42,11 +42,36 @@ const PACKAGES_PAGE_SIZE = 12;
 /** Ask the API for one large page so we can slice in the browser. */
 const ESIM_FETCH_LIMIT = 5000;
 
-const Country = () => {
+const TAB_QUERY_KEY = "tab";
+
+const REGION_FROM_TAB = {
+  local: "Local",
+  regional: "Regional",
+  global: "Global",
+};
+
+const TAB_FROM_REGION = {
+  Local: "local",
+  Regional: "regional",
+  Global: "global",
+};
+
+function regionFromSearchParams(searchParams) {
+  const raw = searchParams.get(TAB_QUERY_KEY)?.toLowerCase();
+  if (raw && REGION_FROM_TAB[raw]) return REGION_FROM_TAB[raw];
+  return "Local";
+}
+
+const CountryContent = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const url = pathname;
 
-  const [region, setRegion] = useState("Local");
+  const region = useMemo(
+    () => regionFromSearchParams(searchParams),
+    [searchParams]
+  );
   const [stateStatus, setStateStatus] = useState("Oceania");
   const [categoryState, setCategoryState] = useState("Date");
 
@@ -244,7 +269,10 @@ const Country = () => {
   };
 
   const handleRegionChange = (value) => {
-    setRegion(value);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set(TAB_QUERY_KEY, TAB_FROM_REGION[value]);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     resetSelections();
     setSearchText("");
     setGlobalSearch("");
@@ -672,5 +700,19 @@ const Country = () => {
     </section>
   );
 };
+
+const Country = () => (
+  <Suspense
+    fallback={
+      <section className="bg-[#F7F7F7]">
+        <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex justify-center items-center min-h-[280px]">
+          <Loading />
+        </div>
+      </section>
+    }
+  >
+    <CountryContent />
+  </Suspense>
+);
 
 export default Country;

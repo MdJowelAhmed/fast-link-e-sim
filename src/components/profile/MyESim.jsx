@@ -9,6 +9,7 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { useGetMyESimsQuery } from "@/helpers/myESimApi";
 import { saveSelectedEsim } from "@/helpers/selectedEsim";
+import Loading from "@/app/loading";
 
 const tabs = [
   {
@@ -88,7 +89,9 @@ const MyESim = () => {
       {selectedTab === "Current eSIM" && (
         <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 space-y-2">
           {isLoading || isFetching ? (
-            <p className="text-sm text-[#767676] py-6">Loading...</p>
+            <div className="col-span-full flex justify-center items-center w-full">
+              <Loading />
+            </div>
           ) : filteredOrders.length ? (
             filteredOrders?.map((order, idx) => (
               <Link
@@ -146,7 +149,9 @@ const MyESim = () => {
               </Link>
             ))
           ) : (
-            <p className="text-sm text-[#767676] py-6">No eSIM found.</p>
+            <div className="col-span-full flex justify-center items-center w-full">
+              <p className="text-sm text-[#767676] py-6">No eSIM found.</p>
+            </div>
           )}
         </div>
       )}
@@ -154,7 +159,9 @@ const MyESim = () => {
       {selectedTab === "Archived" && (
         <div className="max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 pt-2 space-y-2">
           {isLoading || isFetching ? (
-            <p className="text-sm text-[#767676] py-6">Loading...</p>
+            <div className="col-span-full flex justify-center items-center w-full">
+              <Loading />
+            </div>
           ) : filteredOrders.length ? (
             filteredOrders?.map((order, idx) => (
               <Link

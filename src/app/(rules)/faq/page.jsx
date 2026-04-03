@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/accordion";
 import React from "react";
 import { useGetFaqsQuery } from "@/helpers/faqApi";
+import Loading from "@/app/loading";
 
 const page = () => {
   const { data, isLoading } = useGetFaqsQuery();
@@ -23,9 +24,7 @@ const page = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-sm text-[#5C5C5C] leading-[150%] max-w-[820px] mx-auto mt-6">
-            Lorem ipsum dolor sit amet consectetur. Amet morbi sit suspendisse
-            dui ut donec vel id. Viverra urna cras nulla elementum. Risus orci
-            dolor euismod in fringilla adipiscing eu condimentum.
+           You can find the answers to your questions here. If you don't find the answer you're looking for, please contact us. We'll be happy to help you. 
           </p>
         </div>
         <div>
@@ -35,8 +34,8 @@ const page = () => {
             className="w-full pt-10 space-y-2"
           >
             {isLoading ? (
-              <div className="text-center py-10 text-sm text-[#5C5C5C]">
-                Loading FAQs...
+              <div className="col-span-full flex justify-center items-center w-full">
+                <Loading />
               </div>
             ) : faqs.length > 0 ? (
               faqs.map((faq, idx) => (
@@ -53,7 +52,7 @@ const page = () => {
                 </AccordionItem>
               ))
             ) : (
-              <div className="text-center py-10 text-sm text-[#5C5C5C]">
+              <div className="col-span-full flex justify-center items-center w-full">
                 No FAQs found.
               </div>
             )}

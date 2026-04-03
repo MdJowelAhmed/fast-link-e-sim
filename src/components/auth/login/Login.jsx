@@ -54,21 +54,15 @@ const Login = () => {
 
       toast.error(res?.message || "Login failed", { id: "login" });
     } catch (err) {
-      const errors = err?.data?.errorMessages ?? err?.data?.errors;
-      const firstValidation =
-        Array.isArray(errors) && errors[0]?.message
-          ? errors[0].message
-          : null;
-      const message =
-        firstValidation ??
-        err?.data?.message ??
-        err?.data?.error ??
-        err?.error ??
-        "Something went wrong. Please try again.";
-      toast.error(
-        typeof message === "string" ? message : "Login failed",
-        { id: "login" }
-      );
+      const data = err?.data;
+      let message =
+        (typeof data === "string" && data) ||
+        (typeof data?.message === "string" && data.message) ||
+        (typeof data?.error === "string" && data.error) ||
+        (Array.isArray(data?.errors) && String(data.errors[0])) ||
+        (typeof err?.error === "string" && err.error) ||
+        "Login failed. Check your email and password.";
+      toast.error(String(message), { id: "login" });
     }
   };
 

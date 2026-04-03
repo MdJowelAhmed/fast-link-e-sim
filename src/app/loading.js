@@ -10,7 +10,7 @@ const Loading = () => {
         <div className="absolute h-16 w-16 rounded-full border-2 border-dashed border-primary animate-spin"></div>
 
         {/* center image */}
-        <div className="h-12 w-12 flex items-center justify-center">
+        <div className="h-12 w-12 flex items-center justify-center ">
           <Image
             src="/favicon.svg"
             alt="loading"

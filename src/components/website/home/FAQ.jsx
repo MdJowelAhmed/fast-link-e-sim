@@ -2,6 +2,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import React from "react";
 import { useGetFaqsQuery } from "@/helpers/faqApi";
+import Loading from "@/app/loading";
 
 const FAQ = () => {
   const { data, isLoading } = useGetFaqsQuery();
@@ -27,8 +28,8 @@ const FAQ = () => {
           className="w-full pt-[53px] space-y-2"
         >
           {isLoading ? (
-            <div className="text-center py-10 text-sm text-[#5C5C5C]">
-              Loading FAQs...
+              <div className="col-span-full flex justify-center items-center w-full">
+              <Loading />
             </div>
           ) : faqs.length > 0 ? (
             faqs.map((faq, index) => (
@@ -46,7 +47,7 @@ const FAQ = () => {
               </AccordionItem>
             ))
           ) : (
-            <div className="text-center py-10 text-sm text-[#5C5C5C]">
+            <div className="col-span-full flex justify-center items-center w-full">
               No FAQs found.
             </div>
           )}

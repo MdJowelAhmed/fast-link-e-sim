@@ -9,6 +9,7 @@ import Image from "next/image";
 import { ConfigProvider, Rate } from "antd";
 import { useGetReviewsQuery } from "@/helpers/reviewApi";
 import { imageUrl } from "@/components/shared/getImageUrl";
+import Loading from "@/app/loading";
 
 const Testimonials = () => {
   const { data, isLoading } = useGetReviewsQuery({
@@ -46,13 +47,8 @@ const Testimonials = () => {
         >
           {isLoading ? (
             <SwiperSlide className="xl:!w-[1200px] bg-[#FDFDFD] h-full flex items-center justify-center rounded-lg transition-opacity duration-300 mb-2">
-              <div
-                className="h-full w-full shadow-md rounded-lg px-14 py-10 text-center text-sm text-[#767676]"
-                style={{
-                  boxShadow: "2px 2px 6px 2px rgba(0, 0, 0, 0.07)",
-                }}
-              >
-                Loading reviews...
+              <div className="col-span-full flex justify-center items-center w-full">
+                <Loading />
               </div>
             </SwiperSlide>
           ) : reviews.length > 0 ? (

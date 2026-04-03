@@ -1,5 +1,6 @@
 "use client";
 
+import Loading from "@/app/loading";
 import { imageUrl } from "@/components/shared/getImageUrl";
 import GoBackButton from "@/components/shared/GoBackButton";
 import { config } from "@/config/env-config";
@@ -15,8 +16,8 @@ const page = ({ params }) => {
   return (
     <div className="mt-20 pt-6 max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 relative mb-[110px]">
       {isLoading ? (
-        <div className="text-center py-20 text-sm text-[#5C5C5C]">
-          Loading blog...
+        <div className="col-span-full flex justify-center items-center w-full">
+          <Loading />
         </div>
       ) : blog ? (
         <>

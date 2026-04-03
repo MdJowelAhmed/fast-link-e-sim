@@ -14,6 +14,7 @@ import {
   useGetMyProfileQuery,
   useUpdateMyProfileMutation,
 } from "@/helpers/authApi";
+import Loading from "@/app/loading";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -127,7 +128,9 @@ const Account = () => {
   if (isLoading && !profile) {
     return (
       <div className="bg-[#F7F7F7] pb-[30px] min-h-[50vh] flex items-center justify-center">
-        <p className="text-[#5C5C5C]">Loading profile...</p>
+        <div className="col-span-full flex justify-center items-center w-full">
+          <Loading />
+        </div>
       </div>
     );
   }
