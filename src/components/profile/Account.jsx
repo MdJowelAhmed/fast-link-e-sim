@@ -15,6 +15,7 @@ import {
   useUpdateMyProfileMutation,
 } from "@/helpers/authApi";
 import Loading from "@/app/loading";
+import { ImagePlus } from "lucide-react";
 
 const formatDate = (value) => {
   if (!value) return "—";
@@ -167,6 +168,32 @@ const Account = () => {
               className="object-cover w-full h-full"
             />
           )}
+          {isEditing ? (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                aria-hidden
+                tabIndex={-1}
+                onChange={handleImageChange}
+              />
+              <div
+                className="absolute inset-x-0 bottom-0 flex justify-center pb-3 pt-8 bg-gradient-to-t from-black/55 to-transparent pointer-events-none"
+                aria-hidden
+              >
+                <button
+                  type="button"
+                  onClick={handlePickImageClick}
+                  className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#333333] shadow-md border border-white/90 hover:bg-[#f7f7f7] transition-colors"
+                  aria-label="Change profile photo"
+                >
+                  <ImagePlus className="h-5 w-5" strokeWidth={2} />
+                </button>
+              </div>
+            </>
+          ) : null}
         </div>
         {isFetching && !isLoading ? (
           <p className="text-sm text-[#5C5C5C] mt-2">Refreshing...</p>
@@ -277,37 +304,6 @@ const Account = () => {
                   placeholder="Contact number"
                   required
                 />
-              </div>
-              <div className="md:col-span-2 space-y-3">
-                <Label>Profile image</Label>
-                <input
-                  ref={fileInputRef}
-                  id="image"
-                  name="image"
-                  type="file"
-                  accept="image/*"
-                  className="sr-only"
-                  onChange={handleImageChange}
-                />
-                <div className="flex flex-wrap items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-11"
-                    onClick={handlePickImageClick}
-                  >
-                    Choose image to upload
-                  </Button>
-                  {imageFile ? (
-                    <span className="text-sm text-[#5C5C5C]">
-                      Selected: {imageFile.name}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-[#5C5C5C]">
-                      No new file selected — current photo will be kept.
-                    </span>
-                  )}
-                </div>
               </div>
             </div>
 
