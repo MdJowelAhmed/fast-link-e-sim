@@ -24,6 +24,7 @@ import {
   useGetRegionsQuery,
 } from "@/helpers/regionsApi";
 import { useGetEsimsQuery, useGetEsimRegionsQuery } from "@/helpers/eSimApi";
+import Loading from "@/app/loading";
 
 const categories = [
   {
@@ -347,9 +348,9 @@ const Country = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-6 mt-6">
                   {isLocalPackagesLoading || isLocalPackagesFetching ? (
-                    <p className="col-span-full text-sm text-[#767676]">
-                      Loading packages...
-                    </p>
+                    <div className="col-span-full flex justify-center items-center w-full">
+                      <Loading />
+                    </div>
                   ) : localPackages.length ? (
                     displayedLocalPackages.map((pkg, index) => (
                       <SimCard
@@ -415,9 +416,9 @@ const Country = () => {
                   {isRegionsLoading ||
                   isCountriesLoading ||
                   isCountriesFetching ? (
-                    <p className="col-span-full text-sm text-[#767676]">
-                      Loading countries...
-                    </p>
+                    <div className="col-span-full flex justify-center items-center w-full">
+                      <Loading />
+                    </div>
                   ) : (url?.includes("shop") ? countries : shortList).length ? (
                     (url?.includes("shop") ? countries : shortList).map(
                       (country, idx) => (
@@ -512,9 +513,9 @@ const Country = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-6 mt-6">
                   {isRegionalPackagesLoading || isRegionalPackagesFetching ? (
-                    <p className="col-span-full text-sm text-[#767676]">
-                      Loading packages...
-                    </p>
+                    <div className="col-span-full flex justify-center items-center w-full">
+                      <Loading />
+                    </div>
                   ) : regionalPackages.length ? (
                     displayedRegionalPackages.map((pkg, index) => (
                       <SimCard
@@ -543,9 +544,9 @@ const Country = () => {
             ) : (
               <div className="border-t-2 border-[#EEEEEE] pt-6 grid grid-cols-2 lg:grid-cols-3 items-center justify-center gap-2 md:gap-6">
                 {isRegionsLoading ? (
-                  <p className="col-span-full text-sm text-[#767676]">
-                    Loading regional eSIMs...
-                  </p>
+                  <div className="col-span-full flex justify-center items-center w-full">
+                    <Loading />
+                  </div>
                 ) : filteredRegionalItems.length ? (
                   filteredRegionalItems?.map((state) => (
                     <div
@@ -638,9 +639,9 @@ const Country = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-6 mt-6">
               {isGlobalPackagesLoading || isGlobalPackagesFetching ? (
-                <p className="col-span-full text-sm text-[#767676]">
-                  Loading global packages...
-                </p>
+                <div className="col-span-full flex justify-center items-center w-full">
+                  <Loading />
+                </div>
               ) : globalPackages.length ? (
                 displayedGlobalPackages.map((pkg, index) => (
                   <SimCard
