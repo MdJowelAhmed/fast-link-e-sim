@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { GoArrowLeft } from "react-icons/go";
 import SimCard from "@/components/shared/SimCard";
+import Pagination from "@/components/shared/Pagination";
 import {
   useGetCountriesBasedOnRegionQuery,
   useGetRegionsQuery,
@@ -35,6 +36,11 @@ const categories = [
   },
 ];
 
+/** Items per page in the UI (pagination is client-side only). */
+const PACKAGES_PAGE_SIZE = 12;
+/** Ask the API for one large page so we can slice in the browser. */
+const ESIM_FETCH_LIMIT = 5000;
+
 const Country = () => {
   const pathname = usePathname();
   const url = pathname;
@@ -51,6 +57,10 @@ const Country = () => {
   const [packageSearch, setPackageSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
 
+  const [localPackagesPage, setLocalPackagesPage] = useState(1);
+  const [regionalPackagesPage, setRegionalPackagesPage] = useState(1);
+  const [globalPackagesPage, setGlobalPackagesPage] = useState(1);
+
   const { data: regionsResponse, isLoading: isRegionsLoading } =
     useGetRegionsQuery();
   const localTabs = asArray(regionsResponse?.data?.countrysRegions);
@@ -62,6 +72,23 @@ const Country = () => {
       setStateStatus(localTabs.includes("Oceania") ? "Oceania" : localTabs[0]);
     }
   }, [localTabs, stateStatus]);
+
+  useEffect(() => {
+    setLocalPackagesPage(1);
+  }, [selectedCountry?.cca2]);
+
+  useEffect(() => {
+    setRegionalPackagesPage(1);
+  }, [selectedRegionalSlug]);
+
+  useEffect(() => {
+    setLocalPackagesPage(1);
+    setRegionalPackagesPage(1);
+  }, [packageSearch]);
+
+  useEffect(() => {
+    setGlobalPackagesPage(1);
+  }, [globalSearch]);
 
   const {
     data: countriesResponse,
@@ -97,7 +124,7 @@ const Country = () => {
       type: "local",
       country: selectedCountry?.cca2,
       page: 1,
-      limit: 12,
+      limit: ESIM_FETCH_LIMIT,
     },
     { skip: region !== "Local" || !selectedCountry?.cca2 }
   );
@@ -107,7 +134,11 @@ const Country = () => {
     isLoading: isRegionalPackagesLoading,
     isFetching: isRegionalPackagesFetching,
   } = useGetEsimRegionsQuery(
-    { slug: selectedRegionalSlug, page: 1, limit: 12 },
+    {
+      slug: selectedRegionalSlug,
+      page: 1,
+      limit: ESIM_FETCH_LIMIT,
+    },
     { skip: region !== "Regional" || !selectedRegionalSlug }
   );
 
@@ -116,7 +147,7 @@ const Country = () => {
     isLoading: isGlobalPackagesLoading,
     isFetching: isGlobalPackagesFetching,
   } = useGetEsimsQuery(
-    { type: "global", page: 1, limit: 12 },
+    { type: "global", page: 1, limit: ESIM_FETCH_LIMIT },
     { skip: region !== "Global" }
   );
 
@@ -153,11 +184,62 @@ const Country = () => {
     );
   }, [globalPackagesResponse?.data, globalSearch]);
 
+  const localTotalPages = useMemo(
+    () => Math.max(1, Math.ceil(localPackages.length / PACKAGES_PAGE_SIZE)),
+    [localPackages.length]
+  );
+
+  const regionalTotalPages = useMemo(
+    () => Math.max(1, Math.ceil(regionalPackages.length / PACKAGES_PAGE_SIZE)),
+    [regionalPackages.length]
+  );
+
+  const globalTotalPages = useMemo(
+    () => Math.max(1, Math.ceil(globalPackages.length / PACKAGES_PAGE_SIZE)),
+    [globalPackages.length]
+  );
+
+  const displayedLocalPackages = useMemo(() => {
+    const start = (localPackagesPage - 1) * PACKAGES_PAGE_SIZE;
+    return localPackages.slice(start, start + PACKAGES_PAGE_SIZE);
+  }, [localPackages, localPackagesPage]);
+
+  const displayedRegionalPackages = useMemo(() => {
+    const start = (regionalPackagesPage - 1) * PACKAGES_PAGE_SIZE;
+    return regionalPackages.slice(start, start + PACKAGES_PAGE_SIZE);
+  }, [regionalPackages, regionalPackagesPage]);
+
+  const displayedGlobalPackages = useMemo(() => {
+    const start = (globalPackagesPage - 1) * PACKAGES_PAGE_SIZE;
+    return globalPackages.slice(start, start + PACKAGES_PAGE_SIZE);
+  }, [globalPackages, globalPackagesPage]);
+
+  useEffect(() => {
+    setLocalPackagesPage((p) =>
+      Math.min(Math.max(1, p), localTotalPages)
+    );
+  }, [localTotalPages]);
+
+  useEffect(() => {
+    setRegionalPackagesPage((p) =>
+      Math.min(Math.max(1, p), regionalTotalPages)
+    );
+  }, [regionalTotalPages]);
+
+  useEffect(() => {
+    setGlobalPackagesPage((p) =>
+      Math.min(Math.max(1, p), globalTotalPages)
+    );
+  }, [globalTotalPages]);
+
   const resetSelections = () => {
     setSelectedCountry(null);
     setSelectedRegionalSlug(null);
     setSelectedRegionalName("");
     setPackageSearch("");
+    setLocalPackagesPage(1);
+    setRegionalPackagesPage(1);
+    setGlobalPackagesPage(1);
   };
 
   const handleRegionChange = (value) => {
@@ -225,6 +307,7 @@ const Country = () => {
                     onClick={() => {
                       setSelectedCountry(null);
                       setPackageSearch("");
+                      setLocalPackagesPage(1);
                     }}
                     className="cursor-pointer text-[#6B6B6B] font-semibold flex items-center gap-2"
                   >
@@ -268,7 +351,7 @@ const Country = () => {
                       Loading packages...
                     </p>
                   ) : localPackages.length ? (
-                    localPackages.map((pkg, index) => (
+                    displayedLocalPackages.map((pkg, index) => (
                       <SimCard
                         key={`${pkg.packageId}-${pkg.slug ?? "pkg"}-${index}`}
                         packageData={pkg}
@@ -280,6 +363,17 @@ const Country = () => {
                     </p>
                   )}
                 </div>
+
+                {localTotalPages > 1 ? (
+                  <Pagination
+                    currentPage={localPackagesPage}
+                    totalPages={localTotalPages}
+                    onPageChange={setLocalPackagesPage}
+                    isLoading={
+                      isLocalPackagesLoading || isLocalPackagesFetching
+                    }
+                  />
+                ) : null}
               </div>
             ) : (
               <div>
@@ -290,6 +384,7 @@ const Country = () => {
                         onClick={() => {
                           setStateStatus(state);
                           setSelectedCountry(null);
+                          setLocalPackagesPage(1);
                         }}
                         className={cn(
                           "px-3 py-1.5 rounded cursor-pointer text-xs md:text-sm",
@@ -377,6 +472,7 @@ const Country = () => {
                       setSelectedRegionalSlug(null);
                       setSelectedRegionalName("");
                       setPackageSearch("");
+                      setRegionalPackagesPage(1);
                     }}
                     className="cursor-pointer text-[#6B6B6B] font-semibold flex items-center gap-2"
                   >
@@ -420,7 +516,7 @@ const Country = () => {
                       Loading packages...
                     </p>
                   ) : regionalPackages.length ? (
-                    regionalPackages.map((pkg, index) => (
+                    displayedRegionalPackages.map((pkg, index) => (
                       <SimCard
                         key={`${pkg.packageId}-${pkg.slug ?? "pkg"}-${index}`}
                         packageData={pkg}
@@ -432,6 +528,17 @@ const Country = () => {
                     </p>
                   )}
                 </div>
+
+                {regionalTotalPages > 1 ? (
+                  <Pagination
+                    currentPage={regionalPackagesPage}
+                    totalPages={regionalTotalPages}
+                    onPageChange={setRegionalPackagesPage}
+                    isLoading={
+                      isRegionalPackagesLoading || isRegionalPackagesFetching
+                    }
+                  />
+                ) : null}
               </div>
             ) : (
               <div className="border-t-2 border-[#EEEEEE] pt-6 grid grid-cols-2 lg:grid-cols-3 items-center justify-center gap-2 md:gap-6">
@@ -446,6 +553,7 @@ const Country = () => {
                         setSelectedRegionalSlug(state?.slugname);
                         setSelectedRegionalName(state?.name);
                         setPackageSearch("");
+                        setRegionalPackagesPage(1);
                       }}
                       key={state?.slugname}
                       className="flex items-center gap-3 px-4 md:px-7 rounded-full cursor-pointer lg:w-[364px] h-16 md:h-20 bg-[#FDFDFD] hover:bg-[#e6f5ee]"
@@ -534,7 +642,7 @@ const Country = () => {
                   Loading global packages...
                 </p>
               ) : globalPackages.length ? (
-                globalPackages.map((pkg, index) => (
+                displayedGlobalPackages.map((pkg, index) => (
                   <SimCard
                     key={`${pkg.packageId}-${pkg.slug ?? "pkg"}-${index}`}
                     packageData={pkg}
@@ -546,6 +654,17 @@ const Country = () => {
                 </p>
               )}
             </div>
+
+            {globalTotalPages > 1 ? (
+              <Pagination
+                currentPage={globalPackagesPage}
+                totalPages={globalTotalPages}
+                onPageChange={setGlobalPackagesPage}
+                isLoading={
+                  isGlobalPackagesLoading || isGlobalPackagesFetching
+                }
+              />
+            ) : null}
           </div>
         )}
       </div>
