@@ -9,7 +9,15 @@ const inviteEarnApi = baseApi.injectEndpoints({
       }),
       providesTags: ["InviteEarn"],
     }),
+
+    connectYourStripeAccount: builder.mutation({
+      query: () => ({
+        url: "/user/connected-account",
+        method: "GET",
+      }),
+      invalidatesTags: ["InviteEarn"],
+    }),
   }),
 });
 
-export const { useGetInviteEarnQuery } = inviteEarnApi;
+export const { useGetInviteEarnQuery, useConnectYourStripeAccountMutation } = inviteEarnApi;
