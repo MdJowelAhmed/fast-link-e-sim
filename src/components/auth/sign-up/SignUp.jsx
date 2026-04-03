@@ -29,6 +29,7 @@ const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const redirect = "/verify-email";
   const [signup, { isLoading }] = useSignupMutation();
 
@@ -48,7 +49,15 @@ const SignUp = () => {
 
     toast.loading("Signing up...", { id: "signUp" });
 
+    const refferalFromQuery =
+      searchParams.get("refferal_code")?.trim() ||
+      searchParams.get("referral_code")?.trim() ||
+      "";
+
     const payload = { name, email, password, contact };
+    if (refferalFromQuery) {
+      payload.refferal_code = refferalFromQuery;
+    }
 
     try {
       const res = await signup(payload).unwrap();
