@@ -1,17 +1,52 @@
 "use client";
 
 import { GoArrowRight } from "react-icons/go";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import featureImage from "@/assests/sellesBg.svg";
 import toast from "react-hot-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useGetMyProfileQuery } from "@/helpers/authApi";
+import { AUTH_CHANGE_EVENT } from "@/helpers/authEvents";
+
+/** Fallback when not logged in or profile has no code yet. */
+const DEFAULT_REFERRAL_CODE = "719087";
+
+function buildSignupReferralUrl(referralCode) {
+  if (typeof window === "undefined") return "";
+  const url = new URL("/sign-up", window.location.origin);
+  url.searchParams.set("refferal_code", referralCode);
+  return url.toString();
+}
 
 const Features = () => {
   const [copied, setCopied] = useState(false);
+  const [linkToCopy, setLinkToCopy] = useState("");
+  const [hasToken, setHasToken] = useState(false);
 
-  const linkToCopy =
-    "https://www.search?sca_esv=891adaa60c792029&udm=2&biw=1920&bih=945&sxsrf";
+  useEffect(() => {
+    const syncToken = () => setHasToken(!!localStorage.getItem("token"));
+    syncToken();
+    window.addEventListener(AUTH_CHANGE_EVENT, syncToken);
+    return () => window.removeEventListener(AUTH_CHANGE_EVENT, syncToken);
+  }, []);
+
+  const { data: profileResponse } = useGetMyProfileQuery(undefined, {
+    skip: !hasToken,
+  });
+
+  const referralCode = useMemo(() => {
+    const raw = profileResponse?.data?.refferal_code;
+    if (raw != null && String(raw).trim() !== "") {
+      return String(raw).trim();
+    }
+    return DEFAULT_REFERRAL_CODE;
+  }, [profileResponse]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setLinkToCopy(buildSignupReferralUrl(referralCode));
+  }, [referralCode]);
 
   const handleCopy = async () => {
     if (typeof window === "undefined") return;
@@ -20,8 +55,11 @@ const Features = () => {
       return;
     }
 
+    const href =
+      linkToCopy || buildSignupReferralUrl(referralCode);
+
     try {
-      await navigator.clipboard.writeText(linkToCopy);
+      await navigator.clipboard.writeText(href);
       setCopied(true);
     } catch (err) {
       console.error("Copy failed:", err);
@@ -69,7 +107,9 @@ const Features = () => {
                   both receive rewards like bonus data or store credit
                   automatically
                 </span>
-                <span className="text-[#1E90FF] text-sm break-all">{linkToCopy}</span>
+                <span className="text-[#1E90FF] text-sm break-all">
+                  {linkToCopy || "…"}
+                </span>
                 <Button
                   onClick={handleCopy}
                   type="button"
