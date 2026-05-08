@@ -16,13 +16,45 @@ import { ScrollArea } from "../ui/scroll-area";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import Link from "next/link";
 import { saveSelectedEsim } from "@/helpers/selectedEsim";
+import { useCreateCartMutation } from "@/helpers/cartApi";
+import { useRouter } from "next/navigation";
+import { IoBagAddOutline } from "react-icons/io5";
 
 const SimCard = ({ packageData }) => {
+  const router = useRouter();
+  const [createCart, { isLoading: isCartLoading }] = useCreateCartMutation();
+
   if (!packageData) return null;
 
   const supportedCountries = packageData?.supported_countries ?? [];
-  const detailsHref = `/view-eSIM-details?packageId=${packageData.packageId}`;
-  const checkoutHref = `/secure-checkout?packageId=${packageData.packageId}`;
+
+  const handleAddToCart = async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    try {
+      await createCart(packageData).unwrap();
+    } catch {
+      // silently fail - item may already be in cart
+    }
+  };
+
+  const handleBuyNow = async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    try {
+      await createCart(packageData).unwrap();
+    } catch {
+      // silently fail
+    }
+    saveSelectedEsim(packageData);
+    router.push("/secure-checkout");
+  };
 
   return (
     <>
@@ -68,7 +100,7 @@ const SimCard = ({ packageData }) => {
           )}
         </div>
 
-        <div className="mt-10">
+        <div className="mt-10 flex flex-col gap-2">
           <Dialog>
             <DialogTrigger asChild>
               <Button className="w-full bg-transparent text-primary py-2 rounded-lg border-primary border cursor-pointer hover:bg-transparent">
@@ -130,14 +162,23 @@ const SimCard = ({ packageData }) => {
                       </ul>
                     </div>
 
-                    <Link
-                      href={checkoutHref}
-                      onClick={() => saveSelectedEsim(packageData)}
-                    >
-                      <Button className="w-full bg-primary hover:bg-primary h-12 mt-16">
-                        BUY NOW
+                    <div className="flex flex-col gap-2 mt-16">
+                      <Button
+                        onClick={handleBuyNow}
+                        disabled={isCartLoading}
+                        className="w-full bg-primary hover:bg-primary h-12"
+                      >
+                        {isCartLoading ? "Adding..." : "BUY NOW"}
                       </Button>
-                    </Link>
+                      <Button
+                        onClick={handleAddToCart}
+                        disabled={isCartLoading}
+                        className="w-full bg-transparent text-primary border border-primary hover:bg-transparent h-12 flex items-center gap-2"
+                      >
+                        <IoBagAddOutline className="text-lg" />
+                        {isCartLoading ? "Adding..." : "ADD TO CART"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
 
@@ -231,11 +272,22 @@ const SimCard = ({ packageData }) => {
             </DialogContent>
           </Dialog>
 
-          <Link href={checkoutHref} onClick={() => saveSelectedEsim(packageData)}>
-            <Button className="w-full bg-primary text-white py-2 rounded-lg mt-2 uppercase cursor-pointer hover:bg-primary">
-              Buy Now
-            </Button>
-          </Link>
+          <Button
+            onClick={handleBuyNow}
+            disabled={isCartLoading}
+            className="w-full bg-primary text-white py-2 rounded-lg uppercase cursor-pointer hover:bg-primary"
+          >
+            {isCartLoading ? "Adding..." : "Buy Now"}
+          </Button>
+
+          {/* <Button
+            onClick={handleAddToCart}
+            disabled={isCartLoading}
+            className="w-full bg-transparent text-primary py-2 rounded-lg border-primary border cursor-pointer hover:bg-transparent flex items-center justify-center gap-2"
+          >
+            <IoBagAddOutline className="text-lg" />
+            {isCartLoading ? "Adding..." : "Add to Cart"}
+          </Button> */}
         </div>
 
         {!!packageData?.discountPercentage && (

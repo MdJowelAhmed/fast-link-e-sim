@@ -10,7 +10,9 @@ import UserDropdown from "./UserDropdown";
 import MarqueeSlider from "./MarqueeSlider";
 import Sidebar from "./Sidebar";
 import { IoIosClose, IoIosMenu } from "react-icons/io";
+import { IoBagOutline } from "react-icons/io5";
 import { AUTH_CHANGE_EVENT } from "@/helpers/authEvents";
+import { useGetCartQuery } from "@/helpers/cartApi";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -24,6 +26,8 @@ const Navbar = () => {
   const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [open, setOpen] = useState(false);
+  const { data: cartData } = useGetCartQuery(undefined, { skip: !isLoggedIn });
+  const cartCount = cartData?.data?.data?.length ?? 0;
 
   useEffect(() => {
     const sync = () => {
@@ -67,6 +71,16 @@ const Navbar = () => {
           </ul>
 
           <div className="flex justify-center items-center gap-5">
+            {isLoggedIn && (
+              <Link href="/secure-checkout" className="relative">
+                <IoBagOutline className="text-2xl text-[#5C5C5C] hover:text-primary transition-colors" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
             {isLoggedIn ? (
               <UserDropdown />
             ) : (
