@@ -72,7 +72,7 @@ const CountryContent = () => {
     () => regionFromSearchParams(searchParams),
     [searchParams]
   );
-  const [stateStatus, setStateStatus] = useState("Oceania");
+  const [stateStatus, setStateStatus] = useState("");
   const [categoryState, setCategoryState] = useState("Date");
 
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -95,7 +95,7 @@ const CountryContent = () => {
   useEffect(() => {
     if (!localTabs.length) return;
     if (!localTabs.includes(stateStatus)) {
-      setStateStatus(localTabs.includes("Oceania") ? "Oceania" : localTabs[0]);
+      setStateStatus(localTabs[0]);
     }
   }, [localTabs, stateStatus]);
 
@@ -277,9 +277,7 @@ const CountryContent = () => {
     setSearchText("");
     setGlobalSearch("");
     if (value === "Local") {
-      setStateStatus(
-          localTabs.includes("Oceania") ? "Oceania" : localTabs[0] ?? "Oceania"
-      );
+      setStateStatus(localTabs[0] ?? "");
     }
   };
 

@@ -1,7 +1,7 @@
 import React from "react";
 import Banner from "./Banner";
 import Country from "./Country";
-import ESimCard from "./ESimCard";
+// import ESimCard from "./ESimCard";
 import Features from "./Features";
 import Benefits from "./Benefits";
 import WorkFunc from "./WorkFunc";
@@ -14,7 +14,7 @@ const MainPage = () => {
     <div>
       <Banner />
       <Country />
-      <ESimCard />
+      {/* <ESimCard /> */}
       <Features />
       <Benefits />
       <WorkFunc />
