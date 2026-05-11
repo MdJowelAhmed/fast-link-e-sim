@@ -1,9 +1,7 @@
 import Link from "next/link";
 import React from "react";
-import { config } from "@/config/env-config";
 import { imageUrl } from "@/components/shared/getImageUrl";
-
-
+import RichHtmlContent from "@/components/shared/RichHtmlContent";
 
 const Blog = ({ img, text, id, content }) => {
   return (
@@ -21,9 +19,10 @@ const Blog = ({ img, text, id, content }) => {
           {text}
         </p>
         {content ? (
-          <p className="text-[#FAFAFA]/90 mt-2 line-clamp-2 max-w-[500px]">
-            {content}
-          </p>
+          <RichHtmlContent
+            html={content}
+            className="mt-2 line-clamp-2 max-w-[500px] text-[#FAFAFA]/90 [&_a]:text-[#FAFAFA]"
+          />
         ) : null}
       </div>
     </Link>

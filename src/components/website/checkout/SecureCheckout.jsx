@@ -293,7 +293,7 @@ const SecureCheckout = () => {
                   type="text"
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
-                  className="w-[250px] h-[45px] bg-white px-6 py-3 rounded-lg placeholder:text-[#EEEEEE] placeholder:text-sm"
+                  className="w-[250px] h-[45px] bg-white px-6 py-3 rounded-lg placeholder:text-[#000000c] border placeholder:text-sm"
                   placeholder="Enter your code"
                 />
                 <button

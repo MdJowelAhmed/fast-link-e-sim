@@ -3,11 +3,9 @@
 import Loading from "@/app/loading";
 import { imageUrl } from "@/components/shared/getImageUrl";
 import GoBackButton from "@/components/shared/GoBackButton";
-import { config } from "@/config/env-config";
+import RichHtmlContent from "@/components/shared/RichHtmlContent";
 import { useGetBlogByIdQuery } from "@/helpers/blogsApi";
 import React from "react";
-
-
 
 const page = ({ params }) => {
   const { data, isLoading } = useGetBlogByIdQuery(params?.id);
@@ -29,9 +27,10 @@ const page = ({ params }) => {
           <h2 className="my-6 text-[#222222] text-3xl xl:leading-[62px] tracking-[1.08px]">
             {blog.title}
           </h2>
-          <p className="text-[#6B6B6B] leading-6 tracking-[0.48px] whitespace-pre-line">
-            {blog.content}
-          </p>
+          <RichHtmlContent
+            html={blog.content}
+            className="text-[#6B6B6B] text-base leading-7 tracking-[0.48px] [&_a]:text-primary"
+          />
         </>
       ) : (
         <div className="text-center py-20 text-sm text-[#5C5C5C]">

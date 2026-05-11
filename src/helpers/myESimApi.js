@@ -8,14 +8,14 @@ const myESimApi = baseApi.injectEndpoints({
         method: "GET",
         params: { page, limit },
       }),
-      providesTags: ["MyESim"],
+      providesTags: ["MyESim","Esim"],
     }),
     getMyESimById: builder.query({
       query: (id) => ({
         url: `/esim/order/${id}`,
         method: "GET",
       }),
-      providesTags: ["MyESim"],
+      providesTags: ["MyESim","Esim"],
     }),
   }),
 });

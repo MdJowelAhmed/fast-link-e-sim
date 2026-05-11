@@ -8,7 +8,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Auth"],
+      invalidatesTags: ["Auth","User"],
     }),
     signup: builder.mutation({
       query: (body) => ({
@@ -64,7 +64,7 @@ export const authApi = baseApi.injectEndpoints({
         url: "/user/profile",
         method: "GET",
       }),
-      providesTags: ["User"],
+      providesTags: ["User","Auth"],
     }),
     updateMyProfile: builder.mutation({
       query: (body) => ({
@@ -72,7 +72,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User","Auth"],
     }),
   }),
 });
