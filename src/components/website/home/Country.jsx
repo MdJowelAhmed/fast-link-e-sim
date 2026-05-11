@@ -80,6 +80,14 @@ const CountryContent = () => {
   const [selectedRegionalName, setSelectedRegionalName] = useState("");
 
   const [searchText, setSearchText] = useState("");
+  const [debouncedCountryName, setDebouncedCountryName] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedCountryName(searchText);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchText]);
   const [packageSearch, setPackageSearch] = useState("");
   const [globalSearch, setGlobalSearch] = useState("");
 
@@ -120,16 +128,14 @@ const CountryContent = () => {
     data: countriesResponse,
     isLoading: isCountriesLoading,
     isFetching: isCountriesFetching,
-  } = useGetCountriesBasedOnRegionQuery(stateStatus, {
-    skip: region !== "Local" || !stateStatus,
-  });
+  } = useGetCountriesBasedOnRegionQuery(
+    { region: stateStatus, countryName: debouncedCountryName },
+    { skip: region !== "Local" || !stateStatus }
+  );
 
   const countries = useMemo(
-    () =>
-      asArray(countriesResponse?.data).filter((country) =>
-        country?.name?.toLowerCase().includes(searchText.toLowerCase())
-      ),
-    [countriesResponse?.data, searchText]
+    () => asArray(countriesResponse?.data),
+    [countriesResponse?.data]
   );
 
   const shortList = countries?.slice(0, 16);
