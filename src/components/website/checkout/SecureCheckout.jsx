@@ -294,13 +294,13 @@ const SecureCheckout = () => {
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value)}
                   className="w-[250px] h-[45px] bg-white px-6 py-3 rounded-lg placeholder:text-[#000000c] border placeholder:text-sm"
-                  placeholder="Enter your code"
+                  placeholder="Enter your coupon "
                 />
                 <button
                   type="button"
                   onClick={handleConfirmCoupon}
                   disabled={!couponInput.trim()}
-                  className="bg-[#FBC02D] text-[#333333] px-6 py-2.5 rounded-lg text-sm font-medium w-full md:w-auto disabled:opacity-50"
+                  className="bg-[#FBC02D] text-[#333333] px-6 py-2.5 rounded-lg text-sm font-medium w-full md:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isCouponChecking ? "Checking..." : "Confirm"}
                 </button>

@@ -3,19 +3,15 @@
 import React from "react";
 import featureImage from "@/assests/sellesBg.svg";
 import ReferralSharePanel from "@/components/shared/ReferralSharePanel";
+import Image from "next/image";
 
 const Features = () => {
   return (
     <section
-      className="bg-[#151515] text-white relative"
-      style={{
-        backgroundImage: `url(${featureImage.src})`,
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "right",
-      }}
+      className="bg-[#151515] text-white relative flex"
+     
     >
-      <div className="absolute inset-0 bg-black opacity-50 pointer-events-none z-0"></div>
+      {/* <div className="absolute inset-0 bg-black opacity-50 pointer-events-none z-0"></div> */}
       <div className="relative z-10 max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 py-[84px] h-full flex flex-col justify-center items-start gap-6">
         <h1 className="text-3xl font-semibold text-[#FDFDFD]">
           Invite & Earn
@@ -26,6 +22,15 @@ const Features = () => {
           rewards like bonus data or store credit automatically
         </p>
         <ReferralSharePanel triggerClassName="mt-2" />
+      </div>
+      <div>
+        <Image
+          src={featureImage}
+          alt="feature"
+          width={500}
+          height={500}
+          className="w-full h-full object-cover"
+        />
       </div>
     </section>
   );

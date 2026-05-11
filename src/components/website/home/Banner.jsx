@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import bg from "@/assests/banner_bg.svg";
-import bg1 from "@/assests/shortBannerBg.svg";
+import bg1 from "@/assests/shortBannerBg.png";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/autoplay";
@@ -13,7 +13,7 @@ import { Autoplay } from "swiper/modules";
 
 const Banner = () => {
   // Example images array (replace with your own images)
-  const bannerImages = [bg, bg1, bg];
+  const bannerImages = [bg, bg1];
 
   return (
     <section
