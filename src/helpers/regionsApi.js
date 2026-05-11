@@ -10,14 +10,21 @@ const regionsApi = baseApi.injectEndpoints({
       providesTags: ["Region"],
     }),
     getCountriesBasedOnRegion: builder.query({
-      query: ({ region, countryName }) => {
-        const params = { region };
+      query: (arg) => {
         const trimmed =
-          typeof countryName === "string" ? countryName.trim() : "";
-        if (trimmed) params.countryName = trimmed;
+          typeof arg?.countryName === "string"
+            ? arg.countryName.trim()
+            : "";
+        if (trimmed) {
+          return {
+            url: "/country",
+            params: { countryName: trimmed },
+            method: "GET",
+          };
+        }
         return {
           url: "/country",
-          params,
+          params: { region: arg?.region },
           method: "GET",
         };
       },

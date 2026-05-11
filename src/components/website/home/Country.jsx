@@ -83,6 +83,10 @@ const CountryContent = () => {
   const [debouncedCountryName, setDebouncedCountryName] = useState("");
 
   useEffect(() => {
+    if (!searchText.trim()) {
+      setDebouncedCountryName("");
+      return;
+    }
     const t = setTimeout(() => {
       setDebouncedCountryName(searchText);
     }, 400);
@@ -102,10 +106,11 @@ const CountryContent = () => {
 
   useEffect(() => {
     if (!localTabs.length) return;
+    if (debouncedCountryName.trim()) return;
     if (!localTabs.includes(stateStatus)) {
       setStateStatus(localTabs[0]);
     }
-  }, [localTabs, stateStatus]);
+  }, [localTabs, stateStatus, debouncedCountryName]);
 
   useEffect(() => {
     setLocalPackagesPage(1);
@@ -124,14 +129,20 @@ const CountryContent = () => {
     setGlobalPackagesPage(1);
   }, [globalSearch]);
 
+  const trimmedDebouncedCountry = debouncedCountryName.trim();
+  const countriesQueryArg = trimmedDebouncedCountry
+    ? { countryName: trimmedDebouncedCountry }
+    : { region: stateStatus };
+
   const {
     data: countriesResponse,
     isLoading: isCountriesLoading,
     isFetching: isCountriesFetching,
-  } = useGetCountriesBasedOnRegionQuery(
-    { region: stateStatus, countryName: debouncedCountryName },
-    { skip: region !== "Local" || !stateStatus }
-  );
+  } = useGetCountriesBasedOnRegionQuery(countriesQueryArg, {
+    skip:
+      region !== "Local" ||
+      (!trimmedDebouncedCountry && !stateStatus),
+  });
 
   const countries = useMemo(
     () => asArray(countriesResponse?.data),
@@ -281,6 +292,7 @@ const CountryContent = () => {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     resetSelections();
     setSearchText("");
+    setDebouncedCountryName("");
     setGlobalSearch("");
     if (value === "Local") {
       setStateStatus(localTabs[0] ?? "");
@@ -418,10 +430,12 @@ const CountryContent = () => {
                           setStateStatus(state);
                           setSelectedCountry(null);
                           setLocalPackagesPage(1);
+                          setSearchText("");
+                          setDebouncedCountryName("");
                         }}
                         className={cn(
                           "px-3 py-1.5 rounded cursor-pointer text-xs md:text-sm",
-                          stateStatus === state
+                          stateStatus === state && !trimmedDebouncedCountry
                             ? "bg-primary text-white"
                             : "bg-[#EEEEEE] text-[#767676]"
                         )}
@@ -475,7 +489,9 @@ const CountryContent = () => {
                     )
                   ) : (
                     <p className="col-span-full text-sm text-[#767676]">
-                      No countries found for {stateStatus}.
+                      {trimmedDebouncedCountry
+                        ? "No countries match your search."
+                        : `No countries found for ${stateStatus}.`}
                     </p>
                   )}
                 </div>
