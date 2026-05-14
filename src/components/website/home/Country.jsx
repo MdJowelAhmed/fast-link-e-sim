@@ -23,7 +23,12 @@ import {
   useGetCountriesBasedOnRegionQuery,
   useGetRegionsQuery,
 } from "@/helpers/regionsApi";
-import { useGetEsimsQuery, useGetEsimRegionsQuery } from "@/helpers/eSimApi";
+import {
+  DEFAULT_ESIM_PACKAGE_SORT,
+  ESIM_PACKAGE_SORT_OPTIONS,
+  useGetEsimsQuery,
+  useGetEsimRegionsQuery,
+} from "@/helpers/eSimApi";
 import Loading from "@/app/loading";
 
 const categories = [
@@ -93,6 +98,7 @@ const CountryContent = () => {
     return () => clearTimeout(t);
   }, [searchText]);
   const [packageSearch, setPackageSearch] = useState("");
+  const [packageSort, setPackageSort] = useState(DEFAULT_ESIM_PACKAGE_SORT);
   const [globalSearch, setGlobalSearch] = useState("");
 
   const [localPackagesPage, setLocalPackagesPage] = useState(1);
@@ -128,6 +134,12 @@ const CountryContent = () => {
   useEffect(() => {
     setGlobalPackagesPage(1);
   }, [globalSearch]);
+
+  useEffect(() => {
+    setLocalPackagesPage(1);
+    setRegionalPackagesPage(1);
+    setGlobalPackagesPage(1);
+  }, [packageSort]);
 
   const trimmedDebouncedCountry = debouncedCountryName.trim();
   const countriesQueryArg = trimmedDebouncedCountry
@@ -168,6 +180,7 @@ const CountryContent = () => {
       country: selectedCountry?.cca2,
       page: 1,
       limit: ESIM_FETCH_LIMIT,
+      sort_order: packageSort,
     },
     { skip: region !== "Local" || !selectedCountry?.cca2 }
   );
@@ -181,6 +194,7 @@ const CountryContent = () => {
       slug: selectedRegionalSlug,
       page: 1,
       limit: ESIM_FETCH_LIMIT,
+      sort_order: packageSort,
     },
     { skip: region !== "Regional" || !selectedRegionalSlug }
   );
@@ -190,7 +204,12 @@ const CountryContent = () => {
     isLoading: isGlobalPackagesLoading,
     isFetching: isGlobalPackagesFetching,
   } = useGetEsimsQuery(
-    { type: "global", page: 1, limit: ESIM_FETCH_LIMIT },
+    {
+      type: "global",
+      page: 1,
+      limit: ESIM_FETCH_LIMIT,
+      sort_order: packageSort,
+    },
     { skip: region !== "Global" }
   );
 
@@ -280,6 +299,7 @@ const CountryContent = () => {
     setSelectedRegionalSlug(null);
     setSelectedRegionalName("");
     setPackageSearch("");
+    setPackageSort(DEFAULT_ESIM_PACKAGE_SORT);
     setLocalPackagesPage(1);
     setRegionalPackagesPage(1);
     setGlobalPackagesPage(1);
@@ -298,6 +318,27 @@ const CountryContent = () => {
       setStateStatus(localTabs[0] ?? "");
     }
   };
+
+  const renderPackageSortMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="h-10 w-full md:w-[94px] bg-[#EEEEEE] text-[#5C5C5C] rounded-full flex items-center justify-center gap-2">
+        <IoFilterOutline className="text-xl" /> <span>Sort</span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-[220px]">
+        <DropdownMenuLabel>Sort packages</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {ESIM_PACKAGE_SORT_OPTIONS.map((opt) => (
+          <DropdownMenuItem
+            key={opt.value}
+            onSelect={() => setPackageSort(opt.value)}
+            className={cn(packageSort === opt.value && "bg-accent")}
+          >
+            {opt.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   const renderSearchInput = (
     value,
@@ -373,20 +414,7 @@ const CountryContent = () => {
                       {renderSearchInput(packageSearch, setPackageSearch)}
                     </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="h-10 w-full md:w-[94px] bg-[#EEEEEE] text-[#5C5C5C] rounded-full flex items-center justify-center gap-2">
-                        <IoFilterOutline className="text-xl" />{" "}
-                        <span>Filter</span>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Billing</DropdownMenuItem>
-                        <DropdownMenuItem>Team</DropdownMenuItem>
-                        <DropdownMenuItem>Subscription</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {renderPackageSortMenu()}
                   </div>
                 </div>
 
@@ -542,20 +570,7 @@ const CountryContent = () => {
                       {renderSearchInput(packageSearch, setPackageSearch)}
                     </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="h-10 w-full md:w-[94px] bg-[#EEEEEE] text-[#5C5C5C] rounded-full flex items-center justify-center gap-2">
-                        <IoFilterOutline className="text-xl" />{" "}
-                        <span>Filter</span>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem>Billing</DropdownMenuItem>
-                        <DropdownMenuItem>Team</DropdownMenuItem>
-                        <DropdownMenuItem>Subscription</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {renderPackageSortMenu()}
                   </div>
                 </div>
 
@@ -669,19 +684,7 @@ const CountryContent = () => {
                   {renderSearchInput(globalSearch, setGlobalSearch)}
                 </div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="h-10 w-full md:w-[94px] bg-[#EEEEEE] text-[#5C5C5C] rounded-full flex items-center justify-center gap-2">
-                    <IoFilterOutline className="text-xl" /> <span>Filter</span>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Billing</DropdownMenuItem>
-                    <DropdownMenuItem>Team</DropdownMenuItem>
-                    <DropdownMenuItem>Subscription</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {renderPackageSortMenu()}
               </div>
             </div>
 
