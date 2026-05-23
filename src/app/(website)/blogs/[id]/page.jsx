@@ -12,7 +12,7 @@ const page = ({ params }) => {
   const blog = data?.data;
 
   return (
-    <div className="mt-20 pt-6 max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 relative mb-[110px]">
+    <div className="mt-20 pt-6 max-w-[1222px] mx-auto px-4 sm:px-6 lg:px-8 relative mb-[110px]">
       {isLoading ? (
         <div className="col-span-full flex justify-center items-center w-full">
           <Loading />
