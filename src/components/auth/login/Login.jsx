@@ -226,15 +226,16 @@ const Login = () => {
                   </Button>
                 </div>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full h-10 bg-white hover:bg-white"
-                  onClick={handleGuestLogin}
-                  disabled={isGuestLoading || isLoading}
-                >
-                  {isGuestLoading ? "Signing in..." : "Guest Login"}
-                </Button>
+                <div className="flex justify-center">
+                  <Button
+                    type="button"
+                    className="w-1/2 h-10"
+                    onClick={handleGuestLogin}
+                    disabled={isGuestLoading || isLoading}
+                  >
+                    {isGuestLoading ? "Signing in..." : "Guest Login"}
+                  </Button>
+                </div>
 
                 <div className="flex justify-center items-center gap-3 md:mt-10">
                   <Separator className={`!w-[145px]`} />
