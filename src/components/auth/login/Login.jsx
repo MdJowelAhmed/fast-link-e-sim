@@ -17,7 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useLoginMutation } from "@/helpers/authApi";
+import { useGuestLoginMutation, useLoginMutation } from "@/helpers/authApi";
 import { notifyAuthChange } from "@/helpers/authEvents";
 import authImg from "@/assests/authImg.png";
 import logo from "@/assests/logo.svg";
@@ -30,6 +30,35 @@ const Login = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const router = useRouter();
   const [login, { isLoading }] = useLoginMutation();
+  const [guestLogin, { isLoading: isGuestLoading }] = useGuestLoginMutation();
+
+  const handleGuestLogin = async () => {
+    toast.loading("Logging in as guest...", { id: "guest-login" });
+
+    try {
+      const res = await guestLogin({}).unwrap();
+
+      if (res?.success && res?.data?.accessToken) {
+        localStorage.setItem("token", res.data.accessToken);
+        notifyAuthChange();
+        toast.success(res.message || "Guest login successful", { id: "guest-login" });
+        router.push("/");
+        return;
+      }
+
+      toast.error(res?.message || "Guest login failed", { id: "guest-login" });
+    } catch (err) {
+      const data = err?.data;
+      const message =
+        (typeof data === "string" && data) ||
+        (typeof data?.message === "string" && data.message) ||
+        (typeof data?.error === "string" && data.error) ||
+        (Array.isArray(data?.errors) && String(data.errors[0])) ||
+        (typeof err?.error === "string" && err.error) ||
+        "Guest login failed. Please try again.";
+      toast.error(String(message), { id: "guest-login" });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -187,6 +216,16 @@ const Login = () => {
                     <span className="text-[#F1F1F1]">Facebook</span>
                   </Button>
                 </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-10 bg-white hover:bg-white"
+                  onClick={handleGuestLogin}
+                  disabled={isGuestLoading || isLoading}
+                >
+                  {isGuestLoading ? "Signing in..." : "Guest Login"}
+                </Button>
 
                 <div className="flex justify-center items-center gap-3 md:mt-10">
                   <Separator className={`!w-[145px]`} />

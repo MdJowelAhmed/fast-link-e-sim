@@ -10,6 +10,14 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Auth","User"],
     }),
+    guestLogin: builder.mutation({
+      query: (body) => ({
+        url: "/auth/guest-login",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Auth","User"],
+    }),
     signup: builder.mutation({
       query: (body) => ({
         url: "/user",
@@ -79,6 +87,7 @@ export const authApi = baseApi.injectEndpoints({
 
 export const {
   useLoginMutation,
+  useGuestLoginMutation,
   useSignupMutation,
   useVerifyEmailMutation,
   useResendVerificationEmailMutation,
