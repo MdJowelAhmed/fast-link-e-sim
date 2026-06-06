@@ -1,4 +1,5 @@
 import { Poppins } from "next/font/google";
+import PrivateRoute from "@/components/auth/PrivateRoute";
 import Footer from "@/components/shared/footer/Footer";
 import NavbarWrapper from "@/components/shared/navbar/NavbarWrapper";
 import FeedbackModal from "@/components/shared/FeedbackModal";
@@ -22,7 +23,7 @@ export default function RootLayout({ children }) {
     <>
       <NavbarWrapper />
       <div className={` ${poppins.className} min-h-[calc(100vh-140px)]`}>
-        {children}
+        <PrivateRoute>{children}</PrivateRoute>
       </div>
       <FeedbackModal />
       <Footer />

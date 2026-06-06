@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useGuestLoginMutation, useLoginMutation } from "@/helpers/authApi";
 import { notifyAuthChange } from "@/helpers/authEvents";
@@ -29,8 +29,17 @@ import toast from "react-hot-toast";
 const Login = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [login, { isLoading }] = useLoginMutation();
   const [guestLogin, { isLoading: isGuestLoading }] = useGuestLoginMutation();
+
+  const getRedirectPath = () => {
+    const redirect = searchParams.get("redirect");
+    if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) {
+      return redirect;
+    }
+    return "/";
+  };
 
   const handleGuestLogin = async () => {
     toast.loading("Logging in as guest...", { id: "guest-login" });
@@ -42,7 +51,7 @@ const Login = () => {
         localStorage.setItem("token", res.data.accessToken);
         notifyAuthChange();
         toast.success(res.message || "Guest login successful", { id: "guest-login" });
-        router.push("/");
+        router.push(getRedirectPath());
         return;
       }
 
@@ -77,7 +86,7 @@ const Login = () => {
         localStorage.setItem("token", res.data.accessToken);
         notifyAuthChange();
         toast.success(res.message || "Login successful", { id: "login" });
-        router.push("/");
+        router.push(getRedirectPath());
         return;
       }
 

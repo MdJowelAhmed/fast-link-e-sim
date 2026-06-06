@@ -15,12 +15,17 @@ import settingIcon from "@/assests/setting.svg";
 import starIcon from "@/assests/star.svg";
 import earnIcon from "@/assests/earn.svg";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
 import { useModal } from "@/contexts/ModalContext";
 import { notifyAuthChange } from "@/helpers/authEvents";
 import { useGetMyProfileQuery } from "@/helpers/authApi";
+import { baseApi } from "@/helpers/baseApi";
 import { imageUrl } from "@/components/shared/getImageUrl";
 
 const UserDropdown = () => {
+  const router = useRouter();
+  const dispatch = useDispatch();
   const { openFeedbackModal } = useModal();
   const { data } = useGetMyProfileQuery();
   const profile = data?.data ?? null;
@@ -28,7 +33,10 @@ const UserDropdown = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("resetToken");
+    dispatch(baseApi.util.resetApiState());
     notifyAuthChange();
+    router.replace("/login");
   };
 
   return (
