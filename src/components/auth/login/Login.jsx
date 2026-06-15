@@ -226,6 +226,7 @@ const Login = () => {
                   </Button>
                 </div>
 
+                {/* guest login button */}
                 <div className="flex justify-center">
                   <Button
                     type="button"
@@ -237,6 +238,7 @@ const Login = () => {
                   </Button>
                 </div>
 
+                {/* separator */}
                 <div className="flex justify-center items-center gap-3 md:mt-10">
                   <Separator className={`!w-[145px]`} />
                   <p>OR</p>
