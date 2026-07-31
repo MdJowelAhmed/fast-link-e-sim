@@ -653,7 +653,7 @@ const CountryContent = () => {
 
         {region === "Global" && (
           <div>
-            <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-6 md:gap-2 border-b-2 pb-5 border-[#EEEEEE] max-w-screen">
+            <div className="flex flex-wrap md:flex-nowrap justify-end items-center gap-6 md:gap-2 border-b-2 pb-5 border-[#EEEEEE] max-w-screen">
  
 
               <div className="flex items-center gap-2 w-full md:w-auto">
