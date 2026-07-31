@@ -654,22 +654,7 @@ const CountryContent = () => {
         {region === "Global" && (
           <div>
             <div className="flex flex-wrap md:flex-nowrap justify-between items-center gap-6 md:gap-2 border-b-2 pb-5 border-[#EEEEEE] max-w-screen">
-              <div className="flex items-center gap-2">
-                {categories?.map((category) => (
-                  <button
-                    onClick={() => setCategoryState(category.value)}
-                    className={cn(
-                      "px-3 py-1.5 text-sm rounded cursor-pointer",
-                      categoryState === category.value
-                        ? "bg-primary text-white"
-                        : "bg-[#EEEEEE] text-[#767676]"
-                    )}
-                    key={category.value}
-                  >
-                    {category.label}
-                  </button>
-                ))}
-              </div>
+ 
 
               <div className="flex items-center gap-2 w-full md:w-auto">
                 <div
