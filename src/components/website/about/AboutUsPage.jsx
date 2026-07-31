@@ -5,7 +5,7 @@ import React from "react";
 import { useGetDisclaimerQuery } from "@/helpers/disclaimer";
 import Loading from "@/app/loading";
 
-const page = () => {
+const AboutUsPage = () => {
   const { data, isLoading } = useGetDisclaimerQuery("about");
   const content = data?.data ?? "";
 
@@ -32,5 +32,5 @@ const page = () => {
   );
 };
 
-export default page;
+export default AboutUsPage;
 
