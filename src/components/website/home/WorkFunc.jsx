@@ -13,28 +13,28 @@ const WorkFunc = () => {
       key: 1,
       title: "Download the app",
       description:
-        "Our support team is available every day across all time zones No more finding. Adjust the amount of data and the duration of the plans accordingly.",
+        "Download the LinkFast eSIM app or visit our website to get started. Browse eSIM plans for over 190 destinations worldwide!",
       icon: <Image src={download} alt="Download" />,
     },
     {
       key: 2,
       title: "Choose your destination and package",
       description:
-        "Adjust the amount of data and the duration of the plans according .No hidden fees and entirely prepaid. This app is incredibly useful for when you are going to travel.",
+        "Select your travel destination and pick a data package that suits your trip. Choose from local, regional or global plans with flexible data and validity options.",
       icon: <Image src={choose} alt="Phone" />,
     },
     {
       key: 3,
       title: "Install your eSIM",
       description:
-        "Our support team is available every day across all time zones No more finding. Adjust the amount of data and the duration of the plans accordingly.",
+        "Scan the QR code provided after purchase to instantly install your eSIM. No physical SIM card needed, setup takes just a few minutes!",
       icon: <Image src={install} alt="Download" />,
     },
     {
       key: 4,
       title: "Activate your eSIM",
       description:
-        "Our support team is available every day across all time zones No more finding. Adjust the amount of data and the duration of the plans accordingly. This app is incredibly useful for when you are going to travel.",
+        "Activate your eSIM before you travel using WIFI or your existing data connection. Enjoy fast, reliable data connectivity the moment you arrive at your destination!",
       icon: <Image src={activeSIM} alt="Download" />,
     },
   ];

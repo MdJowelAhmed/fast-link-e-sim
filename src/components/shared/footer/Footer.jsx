@@ -19,8 +19,7 @@ const Footer = () => {
           <Image src={logo} alt="logo" />
 
           <p className="max-w-[300px] text-[#EBEBEB] mt-4 text-sm">
-            Where your health is concerned, we believe you have the right to
-            decide what to do with your body...
+            Stay connected wherever you travel with fast, reliable eSIM data. Easy to activate, flexible to use, and no physical SIM required.
           </p>
 
           <div className="flex items-center gap-6 mt-8">
