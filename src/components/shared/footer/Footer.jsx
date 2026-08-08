@@ -1,6 +1,6 @@
-import React from "react";
-import { CgFacebook } from "react-icons/cg";
-import { BsInstagram, BsLinkedin, BsTwitter } from "react-icons/bs";
+"use client";
+
+import React, { useState } from "react";
 import Image from "next/image";
 import logo from "@/assests/footerLogo.svg";
 import playStore from "@/assests/playStore.svg";
@@ -10,8 +10,53 @@ import facebook from "@/assests/facebook.svg";
 import instagram from "@/assests/insta.svg";
 import linkedin from "@/assests/in.svg";
 import X from "@/assests/X.svg";
+import toast from "react-hot-toast";
+import { useCreateNewsletterMutation } from "@/helpers/newsletterApi";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [createNewsletter, { isLoading }] = useCreateNewsletterMutation();
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      toast.error("Please enter your email", { id: "newsletter" });
+      return;
+    }
+
+    try {
+      toast.loading("Subscribing...", { id: "newsletter" });
+      const res = await createNewsletter({ email: trimmedEmail }).unwrap();
+
+      if (res?.success) {
+        toast.success(
+          typeof res?.message === "string"
+            ? res.message
+            : "Subscribed successfully",
+          { id: "newsletter" }
+        );
+        setEmail("");
+        return;
+      }
+
+      toast.error(res?.message || "Something went wrong", {
+        id: "newsletter",
+      });
+    } catch (err) {
+      const message =
+        err?.data?.message ??
+        err?.data?.error ??
+        err?.error ??
+        "Something went wrong. Please try again.";
+
+      toast.error(
+        typeof message === "string" ? message : "Something went wrong",
+        { id: "newsletter" }
+      );
+    }
+  };
+
   return (
     <footer className="bg-[#151515]">
       <div className="flex flex-col md:flex-row justify-between xl:gap-[30px] flex-wrap w-full max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
@@ -51,17 +96,24 @@ const Footer = () => {
           <h3 className="mb-4 text-sm text-[#BBBBBB]">
             Subscribe To Our Email Alerts
           </h3>
-          <div className="flex items-center gap-2">
+          <form onSubmit={handleSubscribe} className="flex items-center gap-2">
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-[250px] h-10 bg-white px-6 py-3 rounded-lg placeholder:text-[#BBBBBB] placeholder:text-sm"
               placeholder="Enter your email"
+              required
             />
 
-            <button className="bg-[#009A54] text-[#F4F4F4] px-6 py-3 rounded-lg text-sm font-medium w-full sm:w-auto">
-              Subscribe
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="bg-[#009A54] text-[#F4F4F4] px-6 py-3 rounded-lg cursor-pointer text-sm font-medium w-full sm:w-auto disabled:opacity-70"
+            >
+              {isLoading ? "Subscribing..." : "Subscribe"}
             </button>
-          </div>
+          </form>
 
           <p className="text-sm text-[#A1A1A1] pt-9 pb-4">Follow us</p>
           <div className="flex items-center gap-8">

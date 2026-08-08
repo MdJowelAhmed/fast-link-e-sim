@@ -13,7 +13,7 @@ const WorkFunc = () => {
       key: 1,
       title: "Download the app",
       description:
-        "Download the LinkFast eSIM app or visit our website to get started. Browse eSIM plans for over 190 destinations worldwide!",
+        "Download the LinkFast eSIM app or visit our website to get started. Browse eSIM plans for over 200+ destinations worldwide!",
       icon: <Image src={download} alt="Download" />,
     },
     {
