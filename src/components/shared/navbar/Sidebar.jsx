@@ -36,6 +36,12 @@ function Sidebar({ setOpen }) {
         onClick={() => setOpen(false)}
         className="text-[#fff] text-lg mt-10 font-medium leading-[150%]"
       >
+        <Link href="/how-it-works">How It Works</Link>
+      </li>
+      <li
+        onClick={() => setOpen(false)}
+        className="text-[#fff] text-lg mt-10 font-medium leading-[150%]"
+      >
         <Link href="/blogs">Blogs</Link>
       </li>
       <li

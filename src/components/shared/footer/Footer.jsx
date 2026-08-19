@@ -81,6 +81,7 @@ const Footer = () => {
           <div className="text-[#EEEEEE] flex flex-col pt-16 gap-8 text-sm">
             <Link href="/shop">Shop</Link>
             <Link href="/about">About Us</Link>
+            <Link href="/how-it-works">How It Works</Link>
             <Link href="/blogs">Blogs</Link>
             <Link href="/contact">Contact</Link>
           </div>

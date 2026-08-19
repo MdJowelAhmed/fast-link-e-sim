@@ -16,9 +16,7 @@ const FAQ = () => {
           Frequently Asked Questions
         </h2>
         <p className="text-sm text-[#5C5C5C] leading-[150%] max-w-[820px] mx-auto mt-6">
-          Lorem ipsum dolor sit amet consectetur. Amet morbi sit suspendisse dui
-          ut donec vel id. Viverra urna cras nulla elementum. Risus orci dolor
-          euismod in fringilla adipiscing eu condimentum.
+        Here you will find answers to common questions about LinkFast eSIMs and how to use them. If you have any other questions, please contact us.
         </p>
       </div>
       <div>

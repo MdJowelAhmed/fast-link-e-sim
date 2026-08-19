@@ -15,12 +15,14 @@ const MainPage = () => {
       <Banner />
       <Country />
       {/* <ESimCard /> */}
-      <Features />
+   
       <Benefits />
       <WorkFunc />
       <Ad />
       <FAQ />
+           <Features />
       <Testimonials />
+ 
     </div>
   );
 };
