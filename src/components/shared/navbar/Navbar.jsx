@@ -18,9 +18,9 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/about", label: "About Us" },
-  { href: "/how-it-works", label: "How It Works" },
   { href: "/blogs", label: "Blogs" },
   { href: "/contact", label: "Contact" },
+  { href: "/how-it-works", label: "How It Works" },
 ];
 
 const Navbar = () => {
@@ -98,9 +98,8 @@ const Navbar = () => {
         </div>
 
         <aside
-          className={`lg:hidden fixed top-0 bg-primary w-screen h-screen py-6 duration-500 ${
-            open ? "left-0" : "-left-[1000px]"
-          }`}
+          className={`lg:hidden fixed top-0 bg-primary w-screen h-screen py-6 duration-500 ${open ? "left-0" : "-left-[1000px]"
+            }`}
         >
           <div
             onClick={() => setOpen((prev) => !prev)}
