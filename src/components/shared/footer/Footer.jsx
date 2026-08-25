@@ -9,6 +9,7 @@ import Link from "next/link";
 import facebook from "@/assests/facebook.svg";
 import instagram from "@/assests/insta.svg";
 import linkedin from "@/assests/in.svg";
+import tiktok from "@/assests/tiktok.png";
 import X from "@/assests/X.svg";
 import toast from "react-hot-toast";
 import { useCreateNewsletterMutation } from "@/helpers/newsletterApi";
@@ -118,21 +119,24 @@ const Footer = () => {
 
           <p className="text-sm text-[#A1A1A1] pt-9 pb-4">Follow us</p>
           <div className="flex items-center gap-8">
-            <Link href="#">
+            <Link href="https://www.facebook.com/profile.php?id=61576894494119" target="_blank">
               <Image src={facebook} alt="Facebook" width={32} />
             </Link>
 
-            <Link href="#">
+            <Link href="https://www.instagram.com/linkfastesims?utm_source=qr" target="_blank">
               <Image src={instagram} alt="Instagram" width={32} />
             </Link>
 
-            <Link href="#">
+            <Link href="https://www.tiktok.com/@linkfast.esim" target="_blank">
+              <Image src={tiktok} alt="Tiktok" width={40} className="rounded-full" />
+            </Link>
+            {/* <Link href="#">
               <Image src={linkedin} alt="LinkedIn" width={32} />
             </Link>
 
             <Link href="#">
               <Image src={X} alt="X" width={32} />
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>
