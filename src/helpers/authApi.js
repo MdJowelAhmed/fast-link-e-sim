@@ -1,5 +1,6 @@
 import { baseApi } from "@/helpers/baseApi";
 
+
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     login: builder.mutation({
@@ -82,6 +83,14 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User","Auth"],
     }),
+
+    googleLogin: builder.mutation({
+      query: () => ({
+        url: "/auth/google-sign-in",
+        method: "GET",
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
 });
 
@@ -96,4 +105,5 @@ export const {
   useChangePasswordMutation,
   useGetMyProfileQuery,
   useUpdateMyProfileMutation,
+  useGoogleLoginMutation,
 } = authApi;

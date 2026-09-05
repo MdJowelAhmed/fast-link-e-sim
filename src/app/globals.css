@@ -132,3 +132,26 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* PhoneInput Country Select styling */
+.PhoneInputCountrySelect {
+  accent-color: #009a54;
+  cursor: pointer;
+}
+
+.PhoneInputCountrySelect option {
+  background-color: #ffffff;
+  color: #1a1a1a;
+  padding: 6px 12px;
+}
+
+.PhoneInputCountrySelect option:checked,
+.PhoneInputCountrySelect option:hover,
+.PhoneInputCountrySelect option:focus,
+.PhoneInputCountrySelect option:active {
+  background-color: #009a54 !important;
+  background: #009a54 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 10px 100px #009a54 inset !important;
+}

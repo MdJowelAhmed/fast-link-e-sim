@@ -12,13 +12,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { useGuestLoginMutation, useLoginMutation } from "@/helpers/authApi";
+import { useState, useEffect } from "react";
+import { useGuestLoginMutation, useLoginMutation, useGoogleLoginMutation } from "@/helpers/authApi";
 import { notifyAuthChange } from "@/helpers/authEvents";
+import { config } from "@/config/env-config";
 import authImg from "@/assests/authImg.png";
 import logo from "@/assests/logo.svg";
 import { FcGoogle } from "react-icons/fc";
@@ -32,6 +33,7 @@ const Login = () => {
   const searchParams = useSearchParams();
   const [login, { isLoading }] = useLoginMutation();
   const [guestLogin, { isLoading: isGuestLoading }] = useGuestLoginMutation();
+  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
 
   const getRedirectPath = () => {
     const redirect = searchParams.get("redirect");
@@ -39,6 +41,51 @@ const Login = () => {
       return redirect;
     }
     return "/";
+  };
+
+  useEffect(() => {
+    const token = searchParams.get("token") || searchParams.get("accessToken");
+    if (token) {
+      localStorage.setItem("token", token);
+      notifyAuthChange();
+      toast.success("Google login successful", { id: "google-login" });
+      router.push(getRedirectPath());
+    }
+  }, [searchParams]);
+
+  const handleGoogleLogin = async () => {
+    toast.loading("Connecting to Google...", { id: "google-login" });
+    try {
+      const res = await googleLogin({}).unwrap();
+
+      const redirectUrl =
+        (typeof res === "string" && res) ||
+        (typeof res?.data === "string" && res.data) ||
+        res?.url ||
+        res?.data?.url ||
+        res?.redirectUrl ||
+        res?.data?.redirectUrl;
+
+      if (redirectUrl && typeof redirectUrl === "string" && (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://"))) {
+        window.location.href = redirectUrl;
+        return;
+      }
+
+      if (res?.success && res?.data?.accessToken) {
+        localStorage.setItem("token", res.data.accessToken);
+        notifyAuthChange();
+        toast.success(res.message || "Google login successful", { id: "google-login" });
+        router.push(getRedirectPath());
+        return;
+      }
+
+      // Direct window redirect if endpoint performs standard OAuth redirect
+      const baseUrl = config.API_V1_BASE || `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1`;
+      window.location.href = `${baseUrl}/auth/google-sign-in`;
+    } catch (err) {
+      const baseUrl = config.API_V1_BASE || `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1`;
+      window.location.href = `${baseUrl}/auth/google-sign-in`;
+    }
   };
 
   const handleGuestLogin = async () => {
@@ -121,11 +168,20 @@ const Login = () => {
       </div>
       <div className="w-full lg:w-1/2  p-6">
         <Card
-          className="bg-[#F7F7F7]  h-full xl:py-16 xl:px-[100px] shadow-none border-none"
+          className="bg-[#F7F7F7]  h-full xl:py-16 xl:px-[100px] shadow-none border-none relative"
           style={{
             boxShadow: "2px 2px 4px 1px rgba(0, 0, 0, 0.07)",
           }}
         >
+          {/* Close button */}
+          <Link
+            href="/"
+            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-200/70"
+            title="Close"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </Link>
           <CardHeader className="text-center">
             <figure className="flex justify-center mb-7">
               <Image src={logo} alt="logo" height={85} />
@@ -207,6 +263,9 @@ const Login = () => {
                 {/* social button */}
                 <div className="flex justify-center items-center gap-4 md:mt-10">
                   <Button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isGoogleLoading || isLoading || isGuestLoading}
                     className={`bg-transparent hover:bg-transparent h-10 px-5 shadow-none`}
                     style={{
                       boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
@@ -216,6 +275,8 @@ const Login = () => {
                     <span className="text-[#606060]">Google</span>
                   </Button>
                   <Button
+                    type="button"
+                    onClick={() => toast.error("Facebook login is coming soon.", { id: "fb-login" })}
                     className={`bg-[#1E90FF] hover:bg-[#1E90FF] h-10 px-5 shadow-none`}
                     style={{
                       boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",

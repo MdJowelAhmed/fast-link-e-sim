@@ -12,26 +12,161 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, X, ChevronDown, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import authImg from "@/assests/authImg.png";
 import logo from "@/assests/logo.svg";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF } from "react-icons/fa";
 import { Separator } from "@/components/ui/separator";
 import toast from "react-hot-toast";
-import { useSignupMutation } from "@/helpers/authApi";
+import { useSignupMutation, useGoogleLoginMutation } from "@/helpers/authApi";
+import { config } from "@/config/env-config";
+import PhoneInput, { getCountries, getCountryCallingCode } from "react-phone-number-input";
+import en from "react-phone-number-input/locale/en";
+import "react-phone-number-input/style.css";
+
+const CustomCountrySelect = ({ value, onChange, options, iconComponent: Icon }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = useRef(null);
+
+  const countryList = useMemo(() => {
+    const rawOptions = options || getCountries();
+    return rawOptions
+      .map((opt) => {
+        const code = typeof opt === "string" ? opt : opt?.value;
+        const label = typeof opt === "string" ? en[opt] || opt : opt?.label;
+        const callingCode = code ? `+${getCountryCallingCode(code)}` : "";
+        return { value: code, label, callingCode };
+      })
+      .filter((c) => c.value);
+  }, [options]);
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return countryList;
+    const q = search.toLowerCase();
+    return countryList.filter(
+      (c) =>
+        c.label.toLowerCase().includes(q) ||
+        c.callingCode.includes(q) ||
+        c.value.toLowerCase().includes(q)
+    );
+  }, [countryList, search]);
+
+  const selected = countryList.find((c) => c.value === value) || countryList[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative shrink-0 flex items-center" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1 bg-transparent py-1 text-xs md:text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none cursor-pointer"
+      >
+        {Icon && <Icon country={selected?.value} label={selected?.label} />}
+        <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 top-full mt-2 w-64 max-h-64 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-xl z-[9999] py-1 scrollbar-hide">
+          <div className="p-2 sticky top-0 bg-white border-b border-gray-100 flex items-center gap-1.5 z-10">
+            <Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search country..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full text-xs px-2 py-1 border border-gray-200 rounded focus:outline-none focus:border-[#009a54]"
+              autoFocus
+            />
+          </div>
+          <div>
+            {filtered.map((c) => {
+              const isSelected = c.value === value;
+              return (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(c.value);
+                    setIsOpen(false);
+                    setSearch("");
+                  }}
+                  className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                    isSelected
+                      ? "bg-[#009a54] text-white font-medium"
+                      : "text-gray-700 hover:bg-[#009a54] hover:text-white"
+                  }`}
+                >
+                  <span className="truncate mr-2">{c.label}</span>
+                  <span className={`shrink-0 ${isSelected ? "text-white" : "text-gray-400 group-hover:text-white"}`}>
+                    {c.callingCode}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [contact, setContact] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = "/verify-email";
   const [signup, { isLoading }] = useSignupMutation();
+  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
+
+  const handleGoogleLogin = async () => {
+    toast.loading("Connecting to Google...", { id: "google-login" });
+    try {
+      const res = await googleLogin({}).unwrap();
+
+      const redirectUrl =
+        (typeof res === "string" && res) ||
+        (typeof res?.data === "string" && res.data) ||
+        res?.url ||
+        res?.data?.url ||
+        res?.redirectUrl ||
+        res?.data?.redirectUrl;
+
+      if (redirectUrl && typeof redirectUrl === "string" && (redirectUrl.startsWith("http://") || redirectUrl.startsWith("https://"))) {
+        window.location.href = redirectUrl;
+        return;
+      }
+
+      if (res?.success && res?.data?.accessToken) {
+        localStorage.setItem("token", res.data.accessToken);
+        toast.success(res.message || "Google login successful", { id: "google-login" });
+        router.push("/");
+        return;
+      }
+
+      const baseUrl = config.API_V1_BASE || `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1`;
+      window.location.href = `${baseUrl}/auth/google-sign-in`;
+    } catch (err) {
+      const baseUrl = config.API_V1_BASE || `${process.env.NEXT_PUBLIC_API_URL || ""}/api/v1`;
+      window.location.href = `${baseUrl}/auth/google-sign-in`;
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,7 +175,7 @@ const SignUp = () => {
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
     const confirmPassword = String(formData.get("confirmPassword") ?? "");
-    const contact = String(formData.get("contact") ?? "").trim();
+    const contactValue = contact || String(formData.get("contact") ?? "").trim();
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match", { id: "signUp" });
@@ -54,7 +189,7 @@ const SignUp = () => {
       searchParams.get("referral_code")?.trim() ||
       "";
 
-    const payload = { name, email, password, contact };
+    const payload = { name, email, password, contact: contactValue };
     if (refferalFromQuery) {
       payload.refferal_code = refferalFromQuery;
     }
@@ -105,11 +240,20 @@ const SignUp = () => {
       </div>
       <div className="w-full lg:w-1/2  p-6">
         <Card
-          className="bg-[#F7F7F7] h-full py-10 xl:px-[100px] shadow-none border-none"
+          className="bg-[#F7F7F7] h-full py-10 xl:px-[100px] shadow-none border-none relative"
           style={{
             boxShadow: "2px 2px 4px 1px rgba(0, 0, 0, 0.07)",
           }}
         >
+          {/* Close button */}
+          <Link
+            href="/"
+            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-200/70"
+            title="Close"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </Link>
           <CardHeader className="text-center">
             <figure className="flex justify-center mb-7">
               <Image src={logo} alt="logo" height={85} />
@@ -131,7 +275,7 @@ const SignUp = () => {
                       id="userName"
                       name="userName"
                       type="text"
-                      placeholder="Md. Atik"
+                      placeholder="Enter Your Name"
                       required
                       className="bg-white shadow-none h-10"
                     />
@@ -144,7 +288,7 @@ const SignUp = () => {
                       id="email"
                       name="email"
                       type="email"
-                      placeholder="me@example.com"
+                      placeholder="Enter Your Email"
                       required
                       className="bg-white shadow-none h-10"
                     />
@@ -153,13 +297,14 @@ const SignUp = () => {
                   {/* contact */}
                   <div className="grid gap-2">
                     <Label htmlFor="contact">Contact (phone)</Label>
-                    <Input
-                      id="contact"
-                      name="contact"
-                      type="tel"
-                      placeholder="3472646135"
-                      required
-                      className="bg-white shadow-none h-10"
+                    <PhoneInput
+                      international
+                      defaultCountry="AU"
+                      value={contact}
+                      onChange={setContact}
+                      countrySelectComponent={CustomCountrySelect}
+                      placeholder="Enter Your Contact"
+                      className="bg-white rounded-md border border-input px-3 h-10 flex items-center shadow-none text-sm focus-within:ring-1 focus-within:ring-[#009a54] [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:w-full [&_.PhoneInputInput]:h-full [&_.PhoneInputCountry]:mr-2"
                     />
                   </div>
 
@@ -212,12 +357,27 @@ const SignUp = () => {
                   {/* remember checkbox */}
                   <div className="flex flex-col md:flex-row justify-between gap-2 items-center">
                     <div className="flex items-center space-x-2">
-                      <Checkbox required id="terms" className="size-5 border-primary" />
+                      <Checkbox required id="terms" className="size-5 border-primary shrink-0" />
                       <label
                         htmlFor="terms"
-                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        className="text-xs md:text-sm leading-snug peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
-                        I agree with terms of service and privacy policy
+                        I agree with{" "}
+                        <Link
+                          href="/terms-and-condition"
+                          target="_blank"
+                          className="font-medium text-primary underline underline-offset-2 hover:underline"
+                        >
+                          terms of service
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          href="/privacy-policy"
+                          target="_blank"
+                          className="font-medium text-primary underline underline-offset-2 hover:underline"
+                        >
+                          privacy policy
+                        </Link>
                       </label>
                     </div>
                   </div>
@@ -235,6 +395,9 @@ const SignUp = () => {
                 {/* social button */}
                 <div className="flex justify-center items-center gap-4">
                   <Button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isGoogleLoading || isLoading}
                     className={`bg-transparent hover:bg-transparent h-10 px-5 shadow-none`}
                     style={{
                       boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
@@ -244,6 +407,8 @@ const SignUp = () => {
                     <span className="text-[#606060]">Google</span>
                   </Button>
                   <Button
+                    type="button"
+                    onClick={() => toast.error("Facebook login is coming soon.", { id: "fb-login" })}
                     className={`bg-[#1E90FF] hover:bg-[#1E90FF] h-10 px-5 shadow-none`}
                     style={{
                       boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
