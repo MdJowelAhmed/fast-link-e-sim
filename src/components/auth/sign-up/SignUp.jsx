@@ -24,10 +24,17 @@ import { FaFacebookF } from "react-icons/fa";
 import { Separator } from "@/components/ui/separator";
 import toast from "react-hot-toast";
 import { useSignupMutation, useGoogleLoginMutation } from "@/helpers/authApi";
+import { useGetDisclaimerQuery } from "@/helpers/disclaimer";
 import { config } from "@/config/env-config";
 import PhoneInput, { getCountries, getCountryCallingCode } from "react-phone-number-input";
 import en from "react-phone-number-input/locale/en";
 import "react-phone-number-input/style.css";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const CustomCountrySelect = ({ value, onChange, options, iconComponent: Icon }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -129,11 +136,17 @@ const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
   const [contact, setContact] = useState("");
+  const [modalType, setModalType] = useState(null); // 'terms' | 'privacy' | null
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = "/verify-email";
   const [signup, { isLoading }] = useSignupMutation();
   const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
+  const { data: disclaimerData, isLoading: isDisclaimerLoading } = useGetDisclaimerQuery(
+    modalType || "terms",
+    { skip: !modalType }
+  );
+  const modalContent = disclaimerData?.data ?? "";
 
   const handleGoogleLogin = async () => {
     toast.loading("Connecting to Google...", { id: "google-login" });
@@ -363,21 +376,27 @@ const SignUp = () => {
                         className="text-xs md:text-sm leading-snug peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
                         I agree with{" "}
-                        <Link
-                          href="/terms-and-condition"
-                          target="_blank"
-                          className="font-medium text-primary underline underline-offset-2 hover:underline"
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setModalType("terms");
+                          }}
+                          className="font-medium text-primary underline underline-offset-2 hover:underline cursor-pointer"
                         >
                           terms of service
-                        </Link>{" "}
+                        </button>{" "}
                         and{" "}
-                        <Link
-                          href="/privacy-policy"
-                          target="_blank"
-                          className="font-medium text-primary underline underline-offset-2 hover:underline"
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setModalType("privacy");
+                          }}
+                          className="font-medium text-primary underline underline-offset-2 hover:underline cursor-pointer"
                         >
                           privacy policy
-                        </Link>
+                        </button>
                       </label>
                     </div>
                   </div>
@@ -440,6 +459,33 @@ const SignUp = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Terms & Privacy Disclaimer Modal */}
+      <Dialog open={Boolean(modalType)} onOpenChange={(open) => !open && setModalType(null)}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto p-6 bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-900 border-b pb-3">
+              {modalType === "privacy" ? "Privacy Policy" : "Terms of Service"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            {isDisclaimerLoading ? (
+              <div className="py-12 text-center text-gray-500 text-sm">
+                Loading {modalType === "privacy" ? "privacy policy" : "terms"}...
+              </div>
+            ) : modalContent ? (
+              <div
+                className="text-[#575757] text-sm leading-relaxed [&_h1]:text-2xl [&_h1]:font-semibold [&_h1]:mb-3 [&_h1]:text-gray-900 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-4 [&_h2]:mb-2 [&_h2]:text-gray-900 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-3 [&_h3]:mb-2 [&_p]:mb-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3 [&_li]:mb-1 [&_strong]:font-semibold"
+                dangerouslySetInnerHTML={{ __html: modalContent }}
+              />
+            ) : (
+              <div className="py-8 text-center text-gray-500 text-sm">
+                No content available.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
