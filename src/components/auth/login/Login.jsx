@@ -44,11 +44,37 @@ const Login = () => {
   };
 
   useEffect(() => {
-    const token = searchParams.get("token") || searchParams.get("accessToken");
-    if (token) {
-      localStorage.setItem("token", token);
+    if (typeof window === "undefined") return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken") || urlParams.get("token");
+    const refreshToken = urlParams.get("refreshToken");
+    const role = urlParams.get("role");
+
+    if (accessToken) {
+      localStorage.setItem("token", accessToken);
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+      if (role) {
+        localStorage.setItem("role", role);
+      }
+
       notifyAuthChange();
-      toast.success("Google login successful", { id: "google-login" });
+      toast.success("Login successful", { id: "google-login" });
+
+      urlParams.delete("accessToken");
+      urlParams.delete("token");
+      urlParams.delete("refreshToken");
+      urlParams.delete("role");
+
+      const cleanSearch = urlParams.toString();
+      const newUrl =
+        window.location.pathname +
+        (cleanSearch ? `?${cleanSearch}` : "") +
+        window.location.hash;
+
+      window.history.replaceState({}, document.title, newUrl);
       router.push(getRedirectPath());
     }
   }, [searchParams]);
@@ -260,44 +286,32 @@ const Login = () => {
                   </Button>
                 </div>
 
-                {/* social button */}
-                <div className="flex justify-center items-center gap-4 md:mt-10">
+                {/* social & guest login buttons */}
+                <div className="flex justify-center items-center gap-4 mt-6 md:mt-8">
                   <Button
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={isGoogleLoading || isLoading || isGuestLoading}
-                    className={`bg-transparent hover:bg-transparent h-10 px-5 shadow-none`}
+                    className="bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 h-10 px-5 font-medium shadow-sm flex items-center gap-2 rounded-md"
                     style={{
                       boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
                     }}
                   >
-                    <FcGoogle />
-                    <span className="text-[#606060]">Google</span>
+                    <FcGoogle className="text-xl" />
+                    <span>Google</span>
                   </Button>
-                  <Button
-                    type="button"
-                    onClick={() => toast.error("Facebook login is coming soon.", { id: "fb-login" })}
-                    className={`bg-[#1E90FF] hover:bg-[#1E90FF] h-10 px-5 shadow-none`}
-                    style={{
-                      boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
-                    }}
-                  >
-                    <FaFacebookF />
-                    <span className="text-[#F1F1F1]">Facebook</span>
-                  </Button>
-                </div>
 
-                {/* guest login button */}
-                <div className="flex justify-center">
                   <Button
                     type="button"
-                    className="w-1/2 h-10"
                     onClick={handleGuestLogin}
-                    disabled={isGuestLoading || isLoading}
+                    disabled={isGuestLoading || isLoading || isGoogleLoading}
+                    className="bg-primary hover:bg-primary/90 text-white h-10 px-5 font-medium shadow-sm flex items-center justify-center rounded-md"
                   >
                     {isGuestLoading ? "Signing in..." : "Guest Login"}
                   </Button>
                 </div>
+
+            
 
                 {/* separator */}
                 <div className="flex justify-center items-center gap-3 md:mt-10">

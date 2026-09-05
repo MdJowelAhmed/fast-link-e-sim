@@ -11,8 +11,9 @@ import MarqueeSlider from "./MarqueeSlider";
 import Sidebar from "./Sidebar";
 import { IoIosClose, IoIosMenu } from "react-icons/io";
 import { IoBagOutline } from "react-icons/io5";
-import { AUTH_CHANGE_EVENT } from "@/helpers/authEvents";
+import { AUTH_CHANGE_EVENT, notifyAuthChange } from "@/helpers/authEvents";
 import { useGetCartQuery } from "@/helpers/cartApi";
+import toast from "react-hot-toast";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -31,8 +32,42 @@ const Navbar = () => {
   const cartCount = cartData?.data?.data?.length ?? 0;
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Process URL tokens if redirected back with accessToken / refreshToken / role
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get("accessToken") || urlParams.get("token");
+    const refreshToken = urlParams.get("refreshToken");
+    const role = urlParams.get("role");
+
+    if (accessToken) {
+      localStorage.setItem("token", accessToken);
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+      if (role) {
+        localStorage.setItem("role", role);
+      }
+
+      notifyAuthChange();
+      toast.success("Login successful", { id: "url-token-login" });
+
+      // Clean up URL parameters from browser address bar
+      urlParams.delete("accessToken");
+      urlParams.delete("token");
+      urlParams.delete("refreshToken");
+      urlParams.delete("role");
+
+      const cleanSearch = urlParams.toString();
+      const newUrl =
+        window.location.pathname +
+        (cleanSearch ? `?${cleanSearch}` : "") +
+        window.location.hash;
+
+      window.history.replaceState({}, document.title, newUrl);
+    }
+
     const sync = () => {
-      if (typeof window === "undefined") return;
       setIsLoggedIn(Boolean(localStorage.getItem("token")));
     };
 
