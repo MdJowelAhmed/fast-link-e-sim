@@ -417,7 +417,7 @@ const SignUp = () => {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={isGoogleLoading || isLoading}
-                    className={`bg-transparent hover:bg-transparent h-10 px-5 shadow-none`}
+                    className={`bg-transparent hover:bg-transparent h-10 px-10 shadow-none`}
                     style={{
                       boxShadow: "0px 2px 4px 0px rgba(0, 0, 0, 0.10)",
                     }}
@@ -425,7 +425,7 @@ const SignUp = () => {
                     <FcGoogle />
                     <span className="text-[#606060]">Google</span>
                   </Button>
-                  <Button
+                  {/* <Button
                     type="button"
                     onClick={() => toast.error("Facebook login is coming soon.", { id: "fb-login" })}
                     className={`bg-[#1E90FF] hover:bg-[#1E90FF] h-10 px-5 shadow-none`}
@@ -435,7 +435,7 @@ const SignUp = () => {
                   >
                     <FaFacebookF />
                     <span className="text-[#F1F1F1]">Facebook</span>
-                  </Button>
+                  </Button> */}
                 </div>
 
                 <div className="flex justify-center items-center gap-3">
