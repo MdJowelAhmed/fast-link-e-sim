@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import simThumb from "@/assests/simThumb.svg";
 import Image from "next/image";
 import dataImg from "@/assests/data.svg";
@@ -24,6 +25,8 @@ import toast from "react-hot-toast";
 const SimCard = ({ packageData }) => {
   const router = useRouter();
   const [createCart, { isLoading: isCartLoading }] = useCreateCartMutation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
 
   if (!packageData) return null;
 
@@ -54,6 +57,7 @@ const SimCard = ({ packageData }) => {
   const handleAddToCart = async () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token) {
+      setIsModalOpen(false);
       router.push("/login");
       return;
     }
@@ -68,16 +72,22 @@ const SimCard = ({ packageData }) => {
   const handleBuyNow = async () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token) {
+      setIsModalOpen(false);
       router.push("/login");
       return;
     }
+    setIsBuying(true);
     try {
       await createCart(packageData).unwrap();
     } catch {
       // silently fail
     }
     saveSelectedEsim(packageData);
-    router.push("/secure-checkout");
+    setIsModalOpen(false);
+    setTimeout(() => {
+      setIsBuying(false);
+      router.push("/secure-checkout");
+    }, 150);
   };
 
   return (
@@ -125,7 +135,7 @@ const SimCard = ({ packageData }) => {
         </div>
 
         <div className="mt-10 flex flex-col gap-2">
-          <Dialog>
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <Button className="w-full bg-transparent text-primary py-2 rounded-lg border-primary border cursor-pointer hover:bg-transparent">
                 View Details
@@ -189,10 +199,10 @@ const SimCard = ({ packageData }) => {
                     <div className="flex flex-col gap-2 mt-16">
                       <Button
                         onClick={handleBuyNow}
-                        disabled={isCartLoading}
+                        disabled={isBuying || isCartLoading}
                         className="w-full bg-primary hover:bg-primary h-12"
                       >
-                        {isCartLoading ? "Adding..." : "BUY NOW"}
+                        {isBuying ? "Processing..." : isCartLoading ? "Adding..." : "BUY NOW"}
                       </Button>
                       <Button
                         onClick={handleAddToCart}
