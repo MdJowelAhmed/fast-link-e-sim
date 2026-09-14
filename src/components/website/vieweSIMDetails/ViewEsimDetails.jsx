@@ -234,146 +234,148 @@ const ViewEsimDetails = () => {
 
       <div className="pt-6 pb-[30px] max-w-[1220px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* top content */}
-        <div className="flex flex-col lg:flex-row items-stretch gap-6">
+        <div className="flex flex-col lg:flex-row items-start gap-6">
           {/* left side */}
           <div
-            className="bg-[#FDFDFD] p-6 rounded-2xl w-full lg:w-[610px] flex flex-col justify-between"
+            className="bg-[#FDFDFD] p-6 rounded-2xl w-full lg:w-[610px] flex flex-col gap-5"
             style={{
               boxShadow: "1px 1px 12px 6px rgba(96, 96, 96, 0.05)",
             }}
           >
-            <div>
-              <div className=" pb-5 border-b border-gray-100">
+            {/* Header section with full-width SIM image and text below */}
+            <div className="flex flex-col gap-4 pb-5 border-b border-gray-100">
+              <div className="w-full rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 shadow-sm">
                 <img
-                  className="w-[180px] h-[115px] rounded-xl object-cover bg-gray-50 border border-gray-100"
+                  className="w-full h-[220px] sm:h-[260px] object-cover object-center"
                   src={esimData.operatorImage}
                   alt={esimData.operatorName}
                 />
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-[#333333]">
-                    {esimData.operatorName}
-                  </h2>
-                  {esimData.packageName &&
-                    esimData.packageName !== esimData.operatorName && (
-                      <p className="text-xs text-[#767676] mt-1 font-medium">
-                        {esimData.packageName}
-                      </p>
-                    )}
-                  <p className="text-primary text-sm mt-3 font-semibold flex items-center gap-1">
-                    {esimData.country}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-[#333333]">
+                  {esimData.operatorName}
+                </h2>
+                {esimData.packageName &&
+                  esimData.packageName !== esimData.operatorName && (
+                    <p className="text-xs text-[#767676] mt-1 font-medium">
+                      {esimData.packageName}
+                    </p>
+                  )}
+                <p className="text-primary text-sm mt-2 font-semibold flex items-center gap-1">
+                  {esimData.country}
+                </p>
+              </div>
+            </div>
+
+            {/* Progress items grid */}
+            <div className="grid grid-cols-2 gap-3 py-2 border-b border-gray-100">
+              <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
+                <div>
+                  <Image className="w-5 h-5" src={gb} alt="Data Icon" />
+                  <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
+                    {esimData.dataAmount}
                   </p>
+                  <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
+                    Data
+                  </p>
+                </div>
+                <div>
+                  <CircularProgressbar
+                    styles={buildStyles({
+                      rotation: 0.25,
+                      pathColor: "#008C4C",
+                      trailColor: "#A3A3A3",
+                      strokeLinecap: "butt",
+                    })}
+                    strokeWidth={14}
+                    value={dataProgress}
+                    className="w-14 h-14"
+                  />
                 </div>
               </div>
 
-              {/* Progress items grid */}
-              <div className="grid grid-cols-2 gap-3 py-4 border-b border-gray-100">
-                <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
-                  <div>
-                    <Image className="w-5 h-5" src={gb} alt="Data Icon" />
-                    <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
-                      {esimData.dataAmount}
-                    </p>
-                    <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
-                      Data
-                    </p>
-                  </div>
-                  <div>
-                    <CircularProgressbar
-                      styles={buildStyles({
-                        rotation: 0.25,
-                        pathColor: "#008C4C",
-                        trailColor: "#A3A3A3",
-                        strokeLinecap: "butt",
-                      })}
-                      strokeWidth={14}
-                      value={dataProgress}
-                      className="w-14 h-14"
-                    />
-                  </div>
+              <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
+                <div>
+                  <Image
+                    className="w-5 h-5"
+                    src={calenderIcon}
+                    alt="Calendar Icon"
+                  />
+                  <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
+                    {esimData.validity}
+                  </p>
+                  <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
+                    Validity
+                  </p>
                 </div>
-
-                <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
-                  <div>
-                    <Image
-                      className="w-5 h-5"
-                      src={calenderIcon}
-                      alt="Calendar Icon"
-                    />
-                    <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
-                      {esimData.validity}
-                    </p>
-                    <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
-                      Validity
-                    </p>
-                  </div>
-                  <div>
-                    <CircularProgressbar
-                      styles={buildStyles({
-                        rotation: 0.25,
-                        pathColor: "#FF4040",
-                        trailColor: "#A3A3A3",
-                        strokeLinecap: "butt",
-                      })}
-                      strokeWidth={14}
-                      value={durationProgress}
-                      className="w-14 h-14"
-                    />
-                  </div>
+                <div>
+                  <CircularProgressbar
+                    styles={buildStyles({
+                      rotation: 0.25,
+                      pathColor: "#FF4040",
+                      trailColor: "#A3A3A3",
+                      strokeLinecap: "butt",
+                    })}
+                    strokeWidth={14}
+                    value={durationProgress}
+                    className="w-14 h-14"
+                  />
                 </div>
+              </div>
 
-                <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
-                  <div>
-                    <Image className="w-5 h-5" src={call} alt="Voice Icon" />
-                    <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
-                      N/A
-                    </p>
-                    <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
-                      Voice
-                    </p>
-                  </div>
-                  <div>
-                    <CircularProgressbar
-                      styles={buildStyles({
-                        rotation: 0.25,
-                        pathColor: "#008C4C",
-                        trailColor: "#A3A3A3",
-                        strokeLinecap: "butt",
-                      })}
-                      strokeWidth={14}
-                      value={0}
-                      className="w-14 h-14"
-                    />
-                  </div>
+              <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
+                <div>
+                  <Image className="w-5 h-5" src={call} alt="Voice Icon" />
+                  <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
+                    N/A
+                  </p>
+                  <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
+                    Voice
+                  </p>
                 </div>
+                <div>
+                  <CircularProgressbar
+                    styles={buildStyles({
+                      rotation: 0.25,
+                      pathColor: "#008C4C",
+                      trailColor: "#A3A3A3",
+                      strokeLinecap: "butt",
+                    })}
+                    strokeWidth={14}
+                    value={0}
+                    className="w-14 h-14"
+                  />
+                </div>
+              </div>
 
-                <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
-                  <div>
-                    <Image className="w-5 h-5" src={chating} alt="SMS Icon" />
-                    <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
-                      N/A
-                    </p>
-                    <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
-                      SMS
-                    </p>
-                  </div>
-                  <div>
-                    <CircularProgressbar
-                      styles={buildStyles({
-                        rotation: 0.25,
-                        pathColor: "#008C4C",
-                        trailColor: "#A3A3A3",
-                        strokeLinecap: "butt",
-                      })}
-                      strokeWidth={14}
-                      value={0}
-                      className="w-14 h-14"
-                    />
-                  </div>
+              <div className="flex justify-between items-center bg-[#EEEEEE] rounded-xl px-4 py-3">
+                <div>
+                  <Image className="w-5 h-5" src={chating} alt="SMS Icon" />
+                  <p className="text-lg font-bold leading-5 mt-2 text-[#333333]">
+                    N/A
+                  </p>
+                  <p className="text-[11px] text-[#767676] mt-0.5 font-medium">
+                    SMS
+                  </p>
+                </div>
+                <div>
+                  <CircularProgressbar
+                    styles={buildStyles({
+                      rotation: 0.25,
+                      pathColor: "#008C4C",
+                      trailColor: "#A3A3A3",
+                      strokeLinecap: "butt",
+                    })}
+                    strokeWidth={14}
+                    value={0}
+                    className="w-14 h-14"
+                  />
                 </div>
               </div>
             </div>
 
-            <ScrollArea className="h-[320px] pr-2 mt-2">
+            {/* Details List */}
+            <div className="pt-2">
               <ul className="text-sm space-y-3">
                 <li className="flex justify-between items-center">
                   <span className="text-[#5C5C5C] font-medium">Data</span>
@@ -466,12 +468,12 @@ const ViewEsimDetails = () => {
                   </p>
                 )}
               </div>
-            </ScrollArea>
+            </div>
           </div>
 
           {/* right side */}
           <div
-            className="lg:w-[570px] bg-[#FDFDFD] p-6 rounded-2xl flex flex-col justify-between"
+            className="lg:w-[570px] bg-[#FDFDFD] p-6 rounded-2xl flex flex-col gap-5 w-full"
             style={{
               boxShadow: "1px 1px 12px 6px rgba(96, 96, 96, 0.05)",
             }}
