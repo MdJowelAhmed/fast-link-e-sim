@@ -19,6 +19,7 @@ import { saveSelectedEsim } from "@/helpers/selectedEsim";
 import { useCreateCartMutation } from "@/helpers/cartApi";
 import { useRouter } from "next/navigation";
 import { IoBagAddOutline } from "react-icons/io5";
+import toast from "react-hot-toast";
 
 const SimCard = ({ packageData }) => {
   const router = useRouter();
@@ -58,8 +59,9 @@ const SimCard = ({ packageData }) => {
     }
     try {
       await createCart(packageData).unwrap();
+      toast.success("Item added to cart");
     } catch {
-      // silently fail - item may already be in cart
+      toast.error("Failed to add item to cart");
     }
   };
 
@@ -295,21 +297,13 @@ const SimCard = ({ packageData }) => {
           </Dialog>
 
           <Button
-            onClick={handleBuyNow}
-            disabled={isCartLoading}
-            className="w-full bg-primary text-white py-2 rounded-lg uppercase cursor-pointer hover:bg-primary"
-          >
-            {isCartLoading ? "Adding..." : "Buy Now"}
-          </Button>
-
-          {/* <Button
             onClick={handleAddToCart}
             disabled={isCartLoading}
-            className="w-full bg-transparent text-primary py-2 rounded-lg border-primary border cursor-pointer hover:bg-transparent flex items-center justify-center gap-2"
+            className="w-full bg-primary text-white py-2 rounded-lg uppercase cursor-pointer hover:bg-primary flex items-center justify-center gap-2"
           >
             <IoBagAddOutline className="text-lg" />
-            {isCartLoading ? "Adding..." : "Add to Cart"}
-          </Button> */}
+            {isCartLoading ? "Adding..." : "ADD TO CART"}
+          </Button>
         </div>
 
         {hasDiscountBadge && (
