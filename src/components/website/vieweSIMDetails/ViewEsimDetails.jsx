@@ -243,7 +243,7 @@ const ViewEsimDetails = () => {
             }}
           >
             <div>
-              <div className="flex items-center gap-[20px] pb-5 border-b border-gray-100">
+              <div className=" pb-5 border-b border-gray-100">
                 <img
                   className="w-[180px] h-[115px] rounded-xl object-cover bg-gray-50 border border-gray-100"
                   src={esimData.operatorImage}
