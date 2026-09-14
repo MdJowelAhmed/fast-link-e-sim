@@ -28,6 +28,28 @@ const SimCard = ({ packageData }) => {
 
   const supportedCountries = packageData?.supported_countries ?? [];
 
+  const priceUSD = Number(packageData?.priceUSD ?? packageData?.price ?? 0);
+  const originalPriceUSD = Number(
+    packageData?.originalPriceUSD ?? packageData?.original_price ?? 0
+  );
+
+  const hasDiscount =
+    !isNaN(originalPriceUSD) &&
+    !isNaN(priceUSD) &&
+    originalPriceUSD > priceUSD &&
+    priceUSD > 0;
+
+  const calculatedDiscountPct = hasDiscount
+    ? Math.round(((originalPriceUSD - priceUSD) / originalPriceUSD) * 100)
+    : 0;
+
+  const discountPercentage =
+    packageData?.discountPercentage ??
+    packageData?.discount_percentage ??
+    calculatedDiscountPct;
+
+  const hasDiscountBadge = hasDiscount && Number(discountPercentage) > 0;
+
   const handleAddToCart = async () => {
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token) {
@@ -84,7 +106,7 @@ const SimCard = ({ packageData }) => {
             <p className="text-sm">{packageData?.dataAmount}</p>
           </div>
           <p className="text-xl font-medium text-[#333333]">
-            ${Number(packageData?.priceUSD || 0).toFixed(2)} USD
+            ${priceUSD.toFixed(2)} USD
           </p>
         </div>
 
@@ -93,9 +115,9 @@ const SimCard = ({ packageData }) => {
             <Image src={calenderImg} alt="eSIM Card" />
             <p className="text-sm">{packageData?.duration}</p>
           </div>
-          {!!packageData?.originalPriceUSD && (
+          {hasDiscount && (
             <p className="text-[#FF4040] line-through text-xs">
-              ${Number(packageData.originalPriceUSD).toFixed(2)} USD
+              ${originalPriceUSD.toFixed(2)} USD
             </p>
           )}
         </div>
@@ -290,10 +312,10 @@ const SimCard = ({ packageData }) => {
           </Button> */}
         </div>
 
-        {!!packageData?.discountPercentage && (
+        {hasDiscountBadge && (
           <div className="absolute -top-4 right-6 bg-[#FFABA9] px-4 py-1 rounded-full">
             <p className="text-white text-xs">
-              {packageData.discountPercentage}% Off
+              {discountPercentage}% Off
             </p>
           </div>
         )}
