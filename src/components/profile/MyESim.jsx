@@ -43,20 +43,33 @@ const MyESim = () => {
   }, [orders, selectedTab]);
 
   const mapOrderToSelectedEsim = (order) => ({
+    _id: order?._id || order?.id || "",
+    code: order?.code || "",
     packageId: order?.packageId,
     operatorName: order?.package_name || order?.packageId,
     type: order?.type,
     slug: order?.country?.toLowerCase?.()?.replace?.(/\s+/g, "-") || "",
     countryName: order?.country,
+    country: order?.country,
     operatorImage: order?.oparator_info?.image || "",
+    oparator_info: order?.oparator_info,
     dataAmount: order?.data,
+    data: order?.data,
     duration: order?.validity ? `${order.validity} Days` : "",
+    validity: order?.validity,
     priceUSD: order?.net_price ?? order?.price ?? 0,
     originalPriceUSD: order?.price ?? order?.net_price ?? 0,
+    net_price: order?.net_price,
+    price: order?.price,
     qr_installation: order?.qr_installation || "",
     manual_installation: order?.manual_installation || "",
+    installation_guides: order?.installation_guides || "",
     supported_countries: order?.supported_countries ?? [],
     fair_usage_policy: order?.fair_usage_policy ?? null,
+    sims: order?.sims ?? [],
+    startDate: order?.startDate,
+    endDate: order?.endDate,
+    status: order?.status,
   });
 
   return (
@@ -95,7 +108,7 @@ const MyESim = () => {
           ) : filteredOrders.length ? (
             filteredOrders?.map((order, idx) => (
               <Link
-                href={`/view-eSIM-details?packageId=${order?.packageId || ""}`}
+                href={`/view-eSIM-details?packageId=${order?.packageId || ""}&id=${order?._id || order?.id || ""}`}
                 onClick={() => saveSelectedEsim(mapOrderToSelectedEsim(order))}
                 key={`${order?._id ?? "order"}-${idx}`}
               className="flex flex-col md:flex-row gap-20 w-full bg-[#FDFDFD] p-5 rounded-2xl"
@@ -165,9 +178,10 @@ const MyESim = () => {
           ) : filteredOrders.length ? (
             filteredOrders?.map((order, idx) => (
               <Link
-                href={`/view-eSIM-details?packageId=${order?.packageId || ""}`}
+                href={`/view-eSIM-details?packageId=${order?.packageId || ""}&id=${order?._id || order?.id || ""}`}
                 onClick={() => saveSelectedEsim(mapOrderToSelectedEsim(order))}
                 key={`${order?._id ?? "order"}-${idx}`}
+
               className="flex flex-col md:flex-row gap-20 w-full bg-[#FDFDFD] p-5 rounded-2xl"
               style={{
                 boxShadow: "2px 2px 4px 1px rgba(0, 0, 0, 0.07)",

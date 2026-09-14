@@ -20,4 +20,4 @@ const myESimApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useGetMyESimsQuery, useGetMyESimByIdQuery } = myESimApi;
+export const { useGetMyESimsQuery, useGetMyESimByIdQuery } = myESimApi;
