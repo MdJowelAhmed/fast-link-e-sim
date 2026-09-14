@@ -5,7 +5,7 @@ const ShortBanner = ({ text, img }) => {
   return (
     <div>
       <section
-        className="h-[180px] bg-cover bg-center bg-no-repeat w-full bg-[#F7F7F7] mt-20"
+        className="h-[280px] bg-cover bg-center bg-no-repeat w-full bg-[#F7F7F7] mt-20"
         style={{
           backgroundImage: `url(${
             img

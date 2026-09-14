@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import bg from "@/assests/profileBg.svg";
+import bg from "@/assests/userProfileBanner.webp";
 import ShortBanner from "../shared/ShortBanner";
 import userImg from "@/assests/userImg.svg";
 import { imageUrl } from "@/components/shared/getImageUrl";
