@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import bg from "@/assests/userProfileBanner.webp";
 import ShortBanner from "../shared/ShortBanner";
-import userImg from "@/assests/userImg.svg";
+import userImg from "@/assests/userImage.webp";
 import { imageUrl } from "@/components/shared/getImageUrl";
 import Image from "next/image";
 import { Input } from "../ui/input";

@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import userImg from "@/assests/userImg.svg";
+import userImg from "@/assests/userImage.webp";
 import Image from "next/image";
 import mySimIcon from "@/assests/mySim.svg";
 import logoutIcon from "@/assests/logout.svg";
