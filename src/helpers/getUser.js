@@ -1,7 +1,7 @@
 // src/helpers/getProfile.js
 "use client";
 
-import userImg from "@/assests/profileImg.svg";
+import userImg from "@/assests/userImage.webp";
 
 function readJwtPayload(token) {
   try {
